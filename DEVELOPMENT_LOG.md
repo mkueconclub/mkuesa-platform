@@ -82,3 +82,42 @@ Brand-led palette (logo purple/orange); all Phase 0 recommendations approved.
 3. Header switches to the mobile menu below 1280px (7 links + 2 buttons don't fit tablets). Revisit after you see it.
 4. Content Security Policy deferred to Phase 7.
 5. Official content, contact details and Members Coordinator name still needed.
+
+---
+
+## Phase 2 — Public Website
+**Date:** 10 Nov 2026 · **Status:** Built and tested, awaiting owner review
+
+### Owner input applied
+Mission, vision and core values (lightly corrected for spelling and grammar; **owner to confirm the final wording**).
+
+### Completed
+- **Home:** hero, mission and vision, "what we do" (derived directly from the mission), core values, announcements, upcoming events, featured academic content, membership call to action.
+- **About:** background (pending), mission and vision, values, objectives (pending), constitution and governance (pending), executive committee (positions only).
+- **Membership:** draft benefits (flagged for confirmation), requirements (pending), three-step process. Registration button disabled until Phase 3.
+- **Events:** upcoming and past lists, plus `/events/[slug]` detail pages (unknown slug returns 404).
+- **Learning Hub, Research, Opportunities:** all categories from the brief, each with sample cards.
+- **Contact:** details pending; form fully built but disabled until the backend, rate limiting and CAPTCHA exist (Phase 3).
+- New components: PageHeader, ContentCard, EventCard, Notice, Textarea. Dependencies added: none.
+
+### Tests run (all passing)
+| Check | Result |
+|---|---|
+| `tsc --noEmit` / `eslint .` | 0 errors / 0 problems |
+| Vitest | 46/46: 28 contrast pairs, sample-content integrity, committee privacy gate, date helpers (Nairobi time), navigation, utilities |
+| `next build` | Succeeds; 17 routes (4 event pages statically generated) |
+| Live server | All routes 200; unknown event 404; exactly one `<h1>` per page; official text present; **no executive name appears in any served page**; contact form disabled with 4 labelled fields; no broken internal links from the home page |
+
+### Test correction
+My first date test assumed a 12-hour clock; `en-KE` correctly uses 24-hour time ("14:00"). The code was right and the test was fixed.
+
+### Not tested
+- **Not viewed in a browser by me.** Visual quality, spacing, hero graphic and mobile layout need your eyes.
+- Keyboard and screen-reader behaviour (formal pass in Phase 7).
+
+### Outstanding
+1. Confirm mission/vision wording; supply history, objectives, constitution, membership requirements, contact details, social links, Members Coordinator name.
+2. Confirm each officer's consent, then set `showExecutiveNames = true`.
+3. Logo replacement (SVG or transparent PNG) still needed.
+4. All events, resources, publications and opportunities are sample content.
+5. Phase 1 review feedback (header, mobile menu, colours) not yet received.

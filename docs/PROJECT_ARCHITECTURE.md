@@ -1,6 +1,6 @@
 # MKUESA Digital Platform — Project Architecture
 
-**Status:** Phase 0 approved by owner (10 Nov 2026). Phase 1 (Foundation) built, awaiting review.
+**Status:** Phases 0-1 approved. Phase 2 (Public website) built, awaiting review.
 **Last updated:** 10 November 2026
 
 > Content marked **[SAMPLE]** or **[TO BE SUPPLIED]** is not official. No association history, names, leadership or contact details are invented anywhere in this project.
@@ -283,3 +283,11 @@ Tokens live in `src/app/globals.css` (`@theme`) and are the single source of tru
 | Fonts | Newsreader (display, serif) + Public Sans (body), self-hosted via Fontsource so no request goes to Google |
 
 `tests/contrast.test.ts` reads the tokens and fails the build if any UI colour pair drops below WCAG AA (22 pairs checked).
+
+## 13. Content Rules (Phase 2)
+
+- **Official content** lives only in `src/config/association.ts` (mission, vision, core values, executive committee).
+- **Sample content** lives only in `src/config/sample-content.ts`. Every item is typed `sample: true`, and each page shows a "Sample content" badge or notice. Tests enforce this.
+- **Missing official information** (history, objectives, constitution, membership requirements, contact details, social links) is shown as a dashed **"To be supplied"** notice. Nothing is invented.
+- **Executive names** are hidden until `showExecutiveNames` is set to `true` (consent decision from Phase 0).
+- Detail pages for resources, publications and opportunities are deferred to Phases 3-5, when real database content exists. Event detail pages (`/events/[slug]`) are built because registration depends on them.

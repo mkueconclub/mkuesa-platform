@@ -43,6 +43,12 @@ const pairs: Array<[string, string, number, string]> = [
   ["brand-200", "brand-950", 4.5, "footer small print"],
   ["accent-400", "brand-950", 4.5, "eyebrow text on dark"],
   ["white", "brand-950", 7, "headings on dark"],
+  ["accent-800", "accent-50", 4.5, "sample-content notice"],
+  ["brand-900", "paper", 7, "card titles"],
+  ["brand-900", "ivory", 7, "headings on ivory"],
+  ["slate", "paper", 4.5, "input placeholder text"],
+  ["white", "brand-800", 4.5, "event date block"],
+  ["ink", "accent-500", 4.5, "membership call-to-action band"],
 ];
 
 describe("WCAG AA colour contrast", () => {

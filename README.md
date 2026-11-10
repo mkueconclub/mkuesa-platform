@@ -2,7 +2,7 @@
 
 Official digital platform for the **Mount Kenya University Economics Students Association (MKUESA)**: a public website, member portal and administration dashboard.
 
-**Current status:** Phase 1 (project foundation) built and tested; awaiting owner review. Public pages are placeholders until Phase 2.
+**Current status:** Phase 2 (public website) built and tested; awaiting owner review. Pages use official mission, vision and values, plus clearly labelled sample content.
 
 ## Planned stack
 Next.js 16 · React 19 · TypeScript 5.9 · Tailwind CSS 4 · Supabase (Postgres, Auth, Storage) · Vercel · GitHub
