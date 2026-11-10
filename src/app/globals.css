@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/*
+  MKUESA design tokens: single source of truth.
+  Brand purple (#9006BF) and orange (#E26716) are sampled from the official logo.
+  Orange fails WCAG AA as text on light backgrounds, so it is used for fills
+  (with dark ink text), accents and large elements only. tests/contrast.test.ts
+  reads this file and enforces the contrast pairs the UI relies on.
+*/
+@theme {
+  --color-ivory: #f4f0e7;
+  --color-paper: #ffffff;
+  --color-ink: #1d1526;
+  --color-muted: #525b6e;
+  --color-slate: #667085;
+
+  --color-brand-50: #f8eefc;
+  --color-brand-100: #efd9f8;
+  --color-brand-200: #ddb4f0;
+  --color-brand-300: #c58ae3;
+  --color-brand-400: #ab4fd2;
+  --color-brand-500: #9006bf;
+  --color-brand-600: #7b05a3;
+  --color-brand-700: #650487;
+  --color-brand-800: #4f036b;
+  --color-brand-900: #3a024e;
+  --color-brand-950: #220131;
+
+  --color-accent-50: #fff4ea;
+  --color-accent-100: #ffe5cf;
+  --color-accent-200: #fdcb9f;
+  --color-accent-400: #f0872f;
+  --color-accent-500: #e26716;
+  --color-accent-600: #c25410;
+  --color-accent-700: #9c4210;
+  --color-accent-800: #7a340d;
+
+  --font-display: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  --font-sans: "Public Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
