@@ -164,3 +164,50 @@ Permission tests showed that `private.purge_old_contact_messages()` was executab
 3. Privacy notice review; retention periods; data-request contact; hosting region.
 4. Waitlist promotion on cancellation (Phase 4); scheduling of the 12-month contact purge (Phase 8).
 5. Items still pending from earlier phases: logo file, official content, executive consent, Members Coordinator name, visual review.
+
+---
+
+## Phase 4 — Member Portal
+**Date:** 11 Nov 2026 · **Status:** Built; verified by typecheck, lint and unit tests; awaiting owner review and a live Supabase project
+
+### Objective
+Give every signed-in person a secure area to manage their details, see their membership, take part in events, read member content and keep their certificates.
+
+### Completed
+- **Portal shell** (`/dashboard/*`): sidebar on desktop, scrolling tabs on phones, one `<h1>` per page, sign-out and Administration (staff only) always reachable.
+- **Overview:** membership status, counts of upcoming events, events attended and certificates, next events and latest announcements.
+- **Profile** (`/dashboard/profile`): edit name, phone, registration number, programme and year. Email and role are read-only. Validation mirrors the database CHECK constraints; the database only lets members change those five columns.
+- **Membership** (`/dashboard/membership`): current-year status, apply form, history, membership number and expiry.
+- **Events** (`/dashboard/events`): upcoming events with Register / Cancel / Register again, waiting-list status, and a record of past participation (attended, registered).
+- **Resources** (`/dashboard/resources`): published resources grouped by category; members-only items appear only to approved members (enforced by Row Level Security, not the interface).
+- **Announcements** (`/dashboard/announcements`): pinned first, plain text only.
+- **Certificates** (`/dashboard/certificates`): own certificates with verification code; revoked ones are hidden by the database.
+- **Waiting-list promotion** (migration `20261112090000`): when a confirmed place is freed (cancel or delete), the longest-waiting person is moved up automatically. Closes the Phase 3 outstanding item.
+- Forms keep what you typed after an error (React 19 otherwise clears them); server actions never throw on missing Supabase keys or network errors.
+- `requireProfile` / `getCurrentUser` are cached per request so layouts and pages share one lookup.
+
+### Tests run
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint src tests` | 0 problems |
+| Unit tests | **102 passing** across all 8 files (16 new: profile validation, event-ID validation, membership and event helper logic). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test` yourself. |
+
+### Not tested (be aware)
+- **`npm run test:db` was not run** (no PostgreSQL in the build sandbox). New file `supabase/tests/t11_waitlist.sql` and migration `20261112090000_waitlist_promotion.sql` are therefore **unverified**. Run `npm run test:db` and report any failure.
+- **`next build` was not run** (sandbox could not download the compiler). Run `npm run build` locally.
+- **No live Supabase project in the sandbox**, so no screen was exercised end to end and nothing was viewed in a browser. Register, confirm, edit profile, register for an event and cancel, all need checking by hand.
+- Keyboard and screen-reader behaviour (formal pass in Phase 7).
+
+### Decisions and trade-offs
+- Event and resource lists load up to 200 and 300 rows and filter in code. Fine for an association; revisit with pagination if content grows large.
+- Re-registering after cancelling deletes the old cancelled row first (members are allowed to delete their own cancelled rows), because one row per person per event is enforced.
+- Resource files (`storage_path`) show a "not available yet" note: the storage bucket and signed downloads belong with secure file uploads in Phase 5/7. Link resources work now.
+
+### Outstanding
+1. Run the checks above and the manual test list in `docs/SUPABASE_SETUP.md` section 9 plus: edit profile, register/cancel/re-register, full-event waiting list, members-only resource hidden until approved.
+2. Certificate files and public verification page (Phase 6).
+3. Email notifications for registration and promotion (needs SMTP, Phase 8).
+4. Account deletion and data-export requests currently go through the contact page; consider a self-service flow for the Data Protection Act.
+5. Items pending from earlier phases: logo file, official content, executive consent, Members Coordinator name, visual review.
+

@@ -18,7 +18,7 @@ import {
 
 const initial: FormState = { ok: false, message: "" };
 
-function Status({ state }: { state: FormState }) {
+export function Status({ state }: { state: FormState }) {
   if (!state.message) return null;
   return (
     <div role={state.ok ? "status" : "alert"} aria-live="polite">
@@ -27,7 +27,7 @@ function Status({ state }: { state: FormState }) {
   );
 }
 
-function Form({ action, children }: { action: (fd: FormData) => void; children: ReactNode }) {
+export function Form({ action, children }: { action: (fd: FormData) => void; children: ReactNode }) {
   return (
     <form action={action} className="space-y-5" noValidate>
       {children}

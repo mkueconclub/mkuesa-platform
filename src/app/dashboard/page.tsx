@@ -1,80 +1,121 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ApplyMembershipForm } from "@/components/auth/auth-forms";
+import { ArrowRight } from "lucide-react";
+import { PageTitle } from "@/components/dashboard/page-title";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Notice } from "@/components/ui/notice";
-import { Section } from "@/components/ui/section";
 import { currentAcademicYear } from "@/config/association";
-import { logoutAction } from "@/lib/auth/actions";
-import { roleLabels, staffRoles } from "@/lib/auth/roles";
 import { requireProfile } from "@/lib/auth/session";
+import { currentMembership, eventHasEnded, getMemberships, membershipStatusText } from "@/lib/member/queries";
 import { createClient } from "@/lib/supabase/server";
-import type { MembershipRow } from "@/types/database";
+import { formatEventDate } from "@/lib/utils/date";
 
 export const metadata: Metadata = { title: "Dashboard", robots: { index: false, follow: false } };
 
-const statusText: Record<MembershipRow["status"], string> = {
-  pending: "Your application is awaiting review by the membership team.",
-  approved: "Your membership is active.",
-  rejected: "Your application was not approved.",
-  suspended: "Your membership is suspended. Please contact the association.",
-  expired: "Your membership has expired.",
-};
+type RegWithEvent = { status: string; event: { id: string; title: string; starts_at: string; ends_at: string | null } | null };
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
   const { denied } = await searchParams;
   const profile = await requireProfile("/dashboard");
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("memberships")
-    .select("status, academic_year, membership_number, rejection_reason")
-    .eq("profile_id", profile.id)
-    .eq("academic_year", currentAcademicYear)
-    .maybeSingle();
-  const membership = data as MembershipRow | null;
+
+  const [memberships, regs, anns, certs] = await Promise.all([
+    getMemberships(profile.id),
+    supabase
+      .from("event_registrations")
+      .select("status, event:events(id, title, starts_at, ends_at)")
+      .eq("profile_id", profile.id)
+      .neq("status", "cancelled"),
+    supabase
+      .from("announcements")
+      .select("id, title, published_at, is_pinned")
+      .order("is_pinned", { ascending: false })
+      .order("published_at", { ascending: false })
+      .limit(3),
+    supabase.from("certificates").select("id", { count: "exact", head: true }).eq("profile_id", profile.id),
+  ]);
+
+  const membership = currentMembership(memberships);
+  const registrations = ((regs.data ?? []) as unknown as RegWithEvent[]).filter((r) => r.event);
+  const upcoming = registrations
+    .filter((r) => r.event && !eventHasEnded(r.event))
+    .sort((a, b) => a.event!.starts_at.localeCompare(b.event!.starts_at));
+  const attended = registrations.filter((r) => r.status === "attended").length;
+  const announcements = anns.data ?? [];
 
   return (
-    <Section eyebrow="Member dashboard" title={`Welcome, ${profile.full_name.split(" ")[0]}`}>
+    <>
+      <PageTitle eyebrow="Member dashboard" title={`Welcome, ${profile.full_name.split(" ")[0]}`} />
       <div className="space-y-6">
         {denied && <Notice>You do not have access to that area.</Notice>}
 
         <Card>
-          <h2 className="text-2xl text-brand-900">Membership {currentAcademicYear}</h2>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <h2 className="text-2xl text-brand-900">Membership {currentAcademicYear}</h2>
+            {membership && <Badge tone={membership.status === "approved" ? "brand" : "neutral"}>{membership.status}</Badge>}
+          </div>
           {membership ? (
-            <div className="mt-3 space-y-2">
-              <Badge tone={membership.status === "approved" ? "brand" : "neutral"}>{membership.status}</Badge>
-              <p>{statusText[membership.status]}</p>
+            <div className="mt-3 space-y-1">
+              <p>{membershipStatusText[membership.status]}</p>
               {membership.membership_number && <p className="text-muted">Membership number: {membership.membership_number}</p>}
-              {membership.status === "rejected" && membership.rejection_reason && <p className="text-muted">Reason: {membership.rejection_reason}</p>}
             </div>
           ) : (
             <div className="mt-3 space-y-4">
               <p className="text-muted">You have not applied for this academic year yet.</p>
-              <ApplyMembershipForm academicYear={currentAcademicYear} />
+              <Button href="/dashboard/membership">Apply for membership</Button>
             </div>
           )}
         </Card>
 
+        <div className="grid gap-6 sm:grid-cols-3">
+          <Card><p className="text-sm text-muted">Upcoming events</p><p className="font-display text-4xl text-brand-900">{upcoming.length}</p></Card>
+          <Card><p className="text-sm text-muted">Events attended</p><p className="font-display text-4xl text-brand-900">{attended}</p></Card>
+          <Card><p className="text-sm text-muted">Certificates</p><p className="font-display text-4xl text-brand-900">{certs.count ?? 0}</p></Card>
+        </div>
+
         <Card>
-          <h2 className="text-2xl text-brand-900">Your details</h2>
-          <dl className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
-            <div><dt className="text-sm text-muted">Name</dt><dd>{profile.full_name}</dd></div>
-            <div><dt className="text-sm text-muted">Email</dt><dd>{profile.email}</dd></div>
-            <div><dt className="text-sm text-muted">Programme</dt><dd>{profile.programme ?? "Not provided"}</dd></div>
-            <div><dt className="text-sm text-muted">Year of study</dt><dd>{profile.year_of_study ?? "Not provided"}</dd></div>
-            <div><dt className="text-sm text-muted">Account type</dt><dd>{roleLabels[profile.role]}</dd></div>
-          </dl>
-          <p className="mt-4 text-sm text-muted">Profile editing, event registration, resources and certificates arrive in Phase 4.</p>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-2xl text-brand-900">Your upcoming events</h2>
+            <Link href="/dashboard/events" className="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline">All events <ArrowRight aria-hidden className="size-4" /></Link>
+          </div>
+          {upcoming.length ? (
+            <ul className="mt-4 divide-y divide-brand-100">
+              {upcoming.slice(0, 3).map((r) => (
+                <li key={r.event!.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                  <div>
+                    <p className="font-medium">{r.event!.title}</p>
+                    <p className="text-sm text-muted">{formatEventDate(r.event!.starts_at)}</p>
+                  </div>
+                  <Badge tone={r.status === "waitlisted" ? "accent" : "brand"}>{r.status}</Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-muted">You are not registered for any upcoming event.</p>
+          )}
         </Card>
 
-        <div className="flex flex-wrap gap-3">
-          {staffRoles.includes(profile.role) && <Button href="/admin">Administration</Button>}
-          <Link href="/" className="inline-flex h-11 items-center px-3 text-sm font-medium text-brand-700 hover:underline">Back to the website</Link>
-          <form action={logoutAction}><Button type="submit" variant="outline">Sign out</Button></form>
-        </div>
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-2xl text-brand-900">Latest announcements</h2>
+            <Link href="/dashboard/announcements" className="inline-flex items-center gap-1 text-sm font-medium text-brand-700 hover:underline">All announcements <ArrowRight aria-hidden className="size-4" /></Link>
+          </div>
+          {announcements.length ? (
+            <ul className="mt-4 divide-y divide-brand-100">
+              {announcements.map((a) => (
+                <li key={a.id} className="py-3">
+                  <p className="font-medium">{a.title}</p>
+                  {a.published_at && <p className="text-sm text-muted">{formatEventDate(a.published_at)}</p>}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-muted">No announcements have been published yet.</p>
+          )}
+        </Card>
       </div>
-    </Section>
+    </>
   );
 }

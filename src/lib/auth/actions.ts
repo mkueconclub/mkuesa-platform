@@ -6,6 +6,7 @@ import { currentAcademicYear, privacyNoticeVersion } from "@/config/association"
 import { safeNext } from "@/lib/auth/redirect";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { echo, formData2obj, invalid, NOT_CONFIGURED, type FormState } from "@/lib/forms";
 import {
   contactSchema,
   fieldErrors,
@@ -16,31 +17,7 @@ import {
   updatePasswordSchema,
 } from "@/lib/validation/auth";
 
-export type FormState = {
-  ok: boolean;
-  message: string;
-  errors?: Record<string, string>;
-  /** Echo of what the person typed (never passwords), so React 19's automatic form reset does not wipe the fields. */
-  values?: Record<string, string>;
-};
-
-const formData2obj = (fd: FormData) => Object.fromEntries(fd.entries());
-const SECRET_FIELDS = new Set(["password", "confirm", "next"]);
-function echo(fd: FormData): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [k, v] of fd.entries()) if (typeof v === "string" && !SECRET_FIELDS.has(k)) out[k] = v;
-  return out;
-}
-const invalid = (errors: Record<string, string>, fd?: FormData): FormState => ({
-  ok: false,
-  message: "Please correct the highlighted fields.",
-  errors,
-  values: fd ? echo(fd) : undefined,
-});
-const NOT_CONFIGURED: FormState = {
-  ok: false,
-  message: "The service is not configured yet (Supabase keys are missing). Fill in .env.local and restart the dev server.",
-};
+export type { FormState };
 
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = registerSchema.safeParse(formData2obj(formData));
