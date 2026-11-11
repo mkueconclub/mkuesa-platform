@@ -17,7 +17,7 @@ export const viewport: Viewport = { themeColor: "#220131" };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="flex min-h-dvh flex-col">{children}</body>
+      <body className="flex min-h-dvh flex-col" suppressHydrationWarning>{children}</body>
     </html>
   );
 }

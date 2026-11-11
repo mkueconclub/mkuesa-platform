@@ -41,7 +41,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
     <Form action={action}>
       {notice && <Notice>{notice}</Notice>}
       <input type="hidden" name="next" value={next} />
-      <Input label="Email" name="email" type="email" autoComplete="email" required error={state.errors?.email} />
+      <Input label="Email" name="email" defaultValue={state.values?.email} type="email" autoComplete="email" required error={state.errors?.email} />
       <Input label="Password" name="password" type="password" autoComplete="current-password" required error={state.errors?.password} />
       {!state.ok && <Status state={state} />}
       <Button type="submit" disabled={pending} className="w-full">{pending ? "Signing in…" : "Sign in"}</Button>
@@ -59,14 +59,14 @@ export function RegisterForm() {
   if (state.ok) return <Status state={state} />;
   return (
     <Form action={action}>
-      <Input label="Full name" name="fullName" autoComplete="name" required error={state.errors?.fullName} />
-      <Input label="Email" name="email" type="email" autoComplete="email" required hint="Any email address you can access." error={state.errors?.email} />
+      <Input label="Full name" name="fullName" defaultValue={state.values?.fullName} autoComplete="name" required error={state.errors?.fullName} />
+      <Input label="Email" name="email" defaultValue={state.values?.email} type="email" autoComplete="email" required hint="Any email address you can access." error={state.errors?.email} />
       <Input label="Password" name="password" type="password" autoComplete="new-password" required minLength={10} hint="At least 10 characters." error={state.errors?.password} />
-      <Input label="Programme (optional)" name="programme" error={state.errors?.programme} />
-      <Input label="Year of study (optional)" name="yearOfStudy" type="number" min={1} max={8} inputMode="numeric" error={state.errors?.yearOfStudy} />
+      <Input label="Programme (optional)" name="programme" defaultValue={state.values?.programme} error={state.errors?.programme} />
+      <Input label="Year of study (optional)" name="yearOfStudy" defaultValue={state.values?.yearOfStudy} type="number" min={1} max={8} inputMode="numeric" error={state.errors?.yearOfStudy} />
       <div>
         <label className="flex items-start gap-3 text-sm">
-          <input type="checkbox" name="consent" required className="mt-1 size-4 accent-brand-700" />
+          <input type="checkbox" name="consent" required defaultChecked={state.values?.consent === "on"} className="mt-1 size-4 accent-brand-700" />
           <span>I have read the <Link href="/privacy" className="font-medium text-brand-700 underline">privacy notice</Link> and agree to MKUESA processing my details as described.</span>
         </label>
         {state.errors?.consent && <p role="alert" className="mt-1.5 text-sm font-medium text-red-700">{state.errors.consent}</p>}
@@ -83,7 +83,7 @@ export function ResetRequestForm() {
   if (state.ok) return <Status state={state} />;
   return (
     <Form action={action}>
-      <Input label="Email" name="email" type="email" autoComplete="email" required error={state.errors?.email} />
+      <Input label="Email" name="email" defaultValue={state.values?.email} type="email" autoComplete="email" required error={state.errors?.email} />
       <Button type="submit" disabled={pending} className="w-full">{pending ? "Sending…" : "Send reset link"}</Button>
     </Form>
   );
@@ -105,7 +105,7 @@ export function ApplyMembershipForm({ academicYear }: { academicYear: string }) 
   const [state, action, pending] = useActionState(applyForMembershipAction, initial);
   return (
     <Form action={action}>
-      <Textarea label="Why would you like to join? (optional)" name="motivation" maxLength={500} className="min-h-24" error={state.errors?.motivation} />
+      <Textarea label="Why would you like to join? (optional)" name="motivation" defaultValue={state.values?.motivation} maxLength={500} className="min-h-24" error={state.errors?.motivation} />
       <Status state={state} />
       <Button type="submit" disabled={pending}>{pending ? "Submitting…" : `Apply for ${academicYear}`}</Button>
     </Form>
@@ -117,10 +117,10 @@ export function ContactForm() {
   if (state.ok) return <Status state={state} />;
   return (
     <Form action={action}>
-      <Input label="Full name" name="name" autoComplete="name" required error={state.errors?.name} />
-      <Input label="Email" name="email" type="email" autoComplete="email" required error={state.errors?.email} />
-      <Input label="Subject" name="subject" required error={state.errors?.subject} />
-      <Textarea label="Message" name="message" required maxLength={2000} error={state.errors?.message} />
+      <Input label="Full name" name="name" defaultValue={state.values?.name} autoComplete="name" required error={state.errors?.name} />
+      <Input label="Email" name="email" defaultValue={state.values?.email} type="email" autoComplete="email" required error={state.errors?.email} />
+      <Input label="Subject" name="subject" defaultValue={state.values?.subject} required error={state.errors?.subject} />
+      <Textarea label="Message" name="message" defaultValue={state.values?.message} required maxLength={2000} error={state.errors?.message} />
       {/* Honeypot: hidden from people and assistive technology; bots fill it in. */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label>Website<input type="text" name="website" tabIndex={-1} autoComplete="off" /></label>

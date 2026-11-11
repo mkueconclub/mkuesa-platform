@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { currentAcademicYear, privacyNoticeVersion } from "@/config/association";
 import { safeNext } from "@/lib/auth/redirect";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import {
   contactSchema,
@@ -15,18 +16,42 @@ import {
   updatePasswordSchema,
 } from "@/lib/validation/auth";
 
-export type FormState = { ok: boolean; message: string; errors?: Record<string, string> };
+export type FormState = {
+  ok: boolean;
+  message: string;
+  errors?: Record<string, string>;
+  /** Echo of what the person typed (never passwords), so React 19's automatic form reset does not wipe the fields. */
+  values?: Record<string, string>;
+};
 
 const formData2obj = (fd: FormData) => Object.fromEntries(fd.entries());
-const invalid = (errors: Record<string, string>): FormState => ({ ok: false, message: "Please correct the highlighted fields.", errors });
+const SECRET_FIELDS = new Set(["password", "confirm", "next"]);
+function echo(fd: FormData): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of fd.entries()) if (typeof v === "string" && !SECRET_FIELDS.has(k)) out[k] = v;
+  return out;
+}
+const invalid = (errors: Record<string, string>, fd?: FormData): FormState => ({
+  ok: false,
+  message: "Please correct the highlighted fields.",
+  errors,
+  values: fd ? echo(fd) : undefined,
+});
+const NOT_CONFIGURED: FormState = {
+  ok: false,
+  message: "The service is not configured yet (Supabase keys are missing). Fill in .env.local and restart the dev server.",
+};
 
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = registerSchema.safeParse(formData2obj(formData));
-  if (!parsed.success) return invalid(fieldErrors(parsed.error));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
   const v = parsed.data;
+  if (!isSupabaseConfigured()) return { ...NOT_CONFIGURED, values: echo(formData) };
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  let result;
+  try {
+    result = await supabase.auth.signUp({
     email: v.email,
     password: v.password,
     options: {
@@ -38,10 +63,22 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
         privacy_notice_version: privacyNoticeVersion,
       },
     },
-  });
+    });
+  } catch (e) {
+    console.error("register threw:", e);
+    return { ok: false, message: "Could not reach the sign-up service. Check your connection and try again.", values: echo(formData) };
+  }
+  const { data, error } = result;
   if (error) {
-    console.error("register failed:", error.code ?? error.name);
-    return { ok: false, message: "We could not create the account. Check your details and try again in a few minutes." };
+    // Log the real reason (e.g. "unexpected_failure" = a database trigger failed) so it can be diagnosed.
+    console.error("register failed:", error.status, error.code ?? error.name, error.message);
+    const message =
+      error.code === "weak_password"
+        ? "That password is too weak. Use at least 10 characters with a mix of letters and numbers."
+        : error.code === "over_email_send_rate_limit" || error.status === 429
+          ? "Too many attempts. Please wait a few minutes and try again."
+          : "We could not create the account. Check your details and try again in a few minutes.";
+    return { ok: false, message, values: echo(formData) };
   }
   if (data.session) redirect("/dashboard"); // only when email confirmation is switched off
   // Same message whether or not the address already has an account (prevents account enumeration).
@@ -50,11 +87,25 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
 
 export async function loginAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = loginSchema.safeParse(formData2obj(formData));
-  if (!parsed.success) return invalid(fieldErrors(parsed.error));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
+  if (!isSupabaseConfigured()) return { ...NOT_CONFIGURED, values: echo(formData) };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
-  if (error) return { ok: false, message: "Incorrect email or password, or the email has not been confirmed yet." };
+  let error;
+  try {
+    ({ error } = await supabase.auth.signInWithPassword(parsed.data));
+  } catch (e) {
+    console.error("login threw:", e);
+    return { ok: false, message: "Could not reach the sign-in service. Check your connection and try again.", values: echo(formData) };
+  }
+  if (error) {
+    console.error("login failed:", error.status, error.code ?? error.name);
+    const message =
+      error.code === "email_not_confirmed"
+        ? "Please confirm your email first: open the link we sent you, then sign in."
+        : "Incorrect email or password.";
+    return { ok: false, message, values: echo(formData) };
+  }
   redirect(safeNext(formData.get("next")));
 }
 
@@ -66,7 +117,7 @@ export async function logoutAction() {
 
 export async function requestPasswordResetAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = resetRequestSchema.safeParse(formData2obj(formData));
-  if (!parsed.success) return invalid(fieldErrors(parsed.error));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email);
   if (error) console.error("reset request failed:", error.code ?? error.name);
@@ -75,7 +126,7 @@ export async function requestPasswordResetAction(_prev: FormState, formData: For
 
 export async function updatePasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = updatePasswordSchema.safeParse(formData2obj(formData));
-  if (!parsed.success) return invalid(fieldErrors(parsed.error));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return { ok: false, message: "This reset link has expired. Request a new one." };
@@ -86,7 +137,7 @@ export async function updatePasswordAction(_prev: FormState, formData: FormData)
 
 export async function applyForMembershipAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = membershipApplicationSchema.safeParse(formData2obj(formData));
-  if (!parsed.success) return invalid(fieldErrors(parsed.error));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect("/login?next=/dashboard");
@@ -111,7 +162,7 @@ export async function submitContactAction(_prev: FormState, formData: FormData):
   if (!parsed.success) {
     // A filled honeypot means a bot: pretend it worked.
     if (parsed.error.issues.some((i) => i.path[0] === "website")) return { ok: true, message: "Thank you. Your message has been sent." };
-    return invalid(fieldErrors(parsed.error));
+    return invalid(fieldErrors(parsed.error), formData);
   }
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_contact_message", {
