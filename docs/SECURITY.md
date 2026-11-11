@@ -1,6 +1,6 @@
 # MKUESA Digital Platform — Security
 
-**Status:** Phase 0 baseline. Expanded in Phases 3 and 7.
+**Status:** Updated in Phase 3. Formal review in Phase 7.
 
 ## Principles
 1. **The database is the security boundary.** Row Level Security on every table; UI hiding is only a convenience.
@@ -31,3 +31,31 @@
 | Date | Finding | Severity | Status |
 |---|---|---|---|
 | 2026-11-10 | `middleware.ts` deprecated in Next.js 16; auth gating moved to `proxy.ts` | Low | Resolved in skeleton |
+
+## Implemented in Phase 3
+
+| Control | How | Verified by |
+|---|---|---|
+| Row Level Security on all 12 tables, default deny | Migration 3 | `t01_structure`: RLS on every table, every table has a policy |
+| Least-privilege grants | Everything revoked from `anon`/`authenticated`, then granted per table and per column | `t01`: no write privileges for anon; no truncate/trigger/references |
+| Role escalation blocked | Column privileges + RLS + trigger; only `set_user_role` by Super Admin | `t03`, `t05` (and a deliberate-break check showing the trigger still holds if a privilege is mis-granted) |
+| Sign-up cannot grant roles or skip consent | Trigger reads a whitelist of metadata keys; refuses without consent | `t02` |
+| Contact form abuse | Honeypot, validation, 3/email/hour and 30/hour limits in the database | `t09` |
+| Audit log tamper-proof | Trigger-written; no client insert/update/delete | `t10` |
+| Internal functions not callable by users | `private` schema, execute revoked | `t01`, `t10` |
+| SECURITY DEFINER functions pin `search_path` | All of them | `t01` |
+| Open-redirect protection on login `next` | `safeNext()` allows only same-site relative paths | `tests/redirect.test.ts` |
+| No account enumeration | Identical response for registered and unregistered emails on sign-up and password reset | By design (not testable without a live project) |
+| Server-side route gating | `/admin` layout calls `requireRole`; role read from the database, not from the token | Live server: signed-out requests redirect to login |
+| Passwords | 10-72 characters; hashing and breach handling by Supabase Auth | Validation tests |
+
+## Not yet covered
+- Content Security Policy (Phase 7).
+- CAPTCHA on registration and contact (deferred; add if abuse appears).
+- Leaked-password protection is a paid Supabase feature; not available on the free plan.
+- Live end-to-end sign-up, confirmation email and login against a real Supabase project: **requires the account to be created** (`docs/SUPABASE_SETUP.md`). Until then these flows are tested only up to the Supabase boundary.
+
+## Findings log (additions)
+| Date | Finding | Severity | Status |
+|---|---|---|---|
+| 2026-11-10 | `private.purge_old_contact_messages()` was created after the privilege lock-down, so any signed-in user could execute it (it deletes only messages older than 12 months). Caught by the permission tests | Medium | Fixed in migration 4; guard test added so any new private function left open fails the build |

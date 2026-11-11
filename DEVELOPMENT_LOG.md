@@ -121,3 +121,46 @@ My first date test assumed a 12-hour clock; `en-KE` correctly uses 24-hour time 
 3. Logo replacement (SVG or transparent PNG) still needed.
 4. All events, resources, publications and opportunities are sample content.
 5. Phase 1 review feedback (header, mobile menu, colours) not yet received.
+
+---
+
+## Phase 3 — Database and Authentication
+**Date:** 10 Nov 2026 · **Status:** Built and tested up to the Supabase boundary; awaiting owner review and Supabase project creation
+
+### Owner input applied
+Supabase account to be created under `mkueconclub@gmail.com`. Registration open to any email address.
+
+### Completed
+- **Four migrations** (`supabase/migrations/`): schema (11 enums, all 12 tables, constraints, indexes), helper functions and triggers, RLS and privileges, public functions.
+- **Authentication:** register, login, logout, password reset (request and update), email-confirmation route, open-redirect protection, privacy-notice consent recorded on the profile.
+- **Role-based access:** 8 roles; permissions enforced by the database. `/admin` gated server-side; `/dashboard` requires sign-in.
+- **Member features (minimal, expanded in Phase 4):** dashboard with membership status and "apply for membership"; admin page showing role and pending-application count.
+- **Contact form live** through a throttled database function (honeypot + limits).
+- **Draft privacy notice** at `/privacy` (needs legal/ICT review).
+- **Docs:** `docs/SUPABASE_SETUP.md` (step-by-step), schema notes, security controls, architecture deviations.
+- Dependencies added: `@supabase/supabase-js`, `@supabase/ssr`, `zod`. Nothing else.
+
+### Tests run (all passing)
+| Check | Result |
+|---|---|
+| Database permission suite (`npm run test:db`) on PostgreSQL 16 with a Supabase stand-in | **179 assertions, 10 files**, covering sign-up, profiles, memberships, roles, content publishing, registrations, certificates, contact, audit |
+| Deliberate-break checks | Opening the `role` column and loosening the contact policy were each caught by the suite |
+| Vitest | **85 tests**: validation, redirect safety, TS roles match SQL, plus Phase 1-2 tests |
+| `tsc` / `eslint` / `next build` | 0 errors / 0 problems / succeeds (21 routes) |
+| Live server, Supabase unconfigured | Public pages, login, register, reset, contact, privacy all 200; protected pages fail with a clear configuration message |
+| Live server, dummy Supabase config | `/dashboard`, `/admin` and sub-paths redirect signed-out users to login with the original path; `/reset-password/update` without a session redirects; `/auth/confirm` with no, bad or unverifiable token redirects safely |
+
+### Defect found and fixed
+Permission tests showed that `private.purge_old_contact_messages()` was executable by any signed-in user (created after the privilege lock-down). Fixed in migration 4; a guard test now fails if any internal function is exposed.
+
+### Not tested (be aware)
+- **No live Supabase project exists yet**, so sign-up, confirmation email, login, password reset and Supabase's own session handling are **untested end-to-end**. They are verified only up to the Supabase boundary. The database tests use a stand-in for Supabase's `auth` schema, so real-Supabase behaviour (e.g. creating a trigger on `auth.users`, key formats, email templates) is unconfirmed until migrations run on a real project.
+- Not viewed in a browser. Phase 2 visual review also still outstanding.
+- Keyboard and screen-reader behaviour of the new forms (Phase 7).
+
+### Outstanding
+1. Create the Supabase project and run migrations (`docs/SUPABASE_SETUP.md`), then report any errors.
+2. Set up SMTP; without it, students cannot receive confirmation emails.
+3. Privacy notice review; retention periods; data-request contact; hosting region.
+4. Waitlist promotion on cancellation (Phase 4); scheduling of the 12-month contact purge (Phase 8).
+5. Items still pending from earlier phases: logo file, official content, executive consent, Members Coordinator name, visual review.

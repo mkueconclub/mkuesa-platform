@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/proxy";
 
-// Next.js 16 "proxy" (formerly middleware).
-// Phase 3 adds Supabase session refresh and coarse route gating here.
-// This is a UX convenience only: real authorisation is enforced by Row Level
-// Security and by checks inside every Server Action.
-export function proxy() {
-  return NextResponse.next();
+// Next.js 16 "proxy" (formerly middleware): keeps the Supabase session fresh.
+// Only routes that touch authentication are matched, so public pages stay fast.
+export async function proxy(request: NextRequest) {
+  return updateSession(request);
 }
 
-export const config = { matcher: ["/dashboard/:path*", "/admin/:path*"] };
+export const config = {
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/register", "/reset-password/:path*", "/auth/:path*"],
+};

@@ -1,0 +1,4 @@
+-- Intentionally empty.
+-- Public pages use labelled sample content from src/config/sample-content.ts until
+-- real content is entered through the admin portal (Phase 5).
+-- NEVER put real student information here.

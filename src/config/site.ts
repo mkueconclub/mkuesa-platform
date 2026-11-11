@@ -34,6 +34,7 @@ export const footerGroups: readonly { title: string; links: readonly NavItem[] }
       { label: "Membership", href: "/membership" },
       { label: "Events", href: "/events" },
       { label: "Contact", href: "/contact" },
+      { label: "Privacy notice", href: "/privacy" },
     ],
   },
   {

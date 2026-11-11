@@ -31,3 +31,9 @@ const executiveCommittee: readonly CommitteeMember[] = [
 export function visibleCommittee(showNames: boolean = showExecutiveNames): CommitteeMember[] {
   return executiveCommittee.map((m) => ({ title: m.title, name: showNames ? m.name : null }));
 }
+
+/** Academic year new membership applications are made for. Owner to confirm each year. */
+export const currentAcademicYear = "2026/2027";
+
+/** Version of the privacy notice a member consents to; stored on their profile. */
+export const privacyNoticeVersion = "draft-1";

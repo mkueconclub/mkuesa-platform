@@ -1,0 +1,16 @@
+# Minimal Supabase CLI configuration (used for `supabase link` / `db push`).
+# Hosted-project auth settings are changed in the dashboard (docs/SUPABASE_SETUP.md).
+project_id = "mkuesa-platform"
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/**"]
+enable_signup = true
+minimum_password_length = 10
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true

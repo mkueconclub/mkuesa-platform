@@ -1,6 +1,6 @@
 # MKUESA Digital Platform — Database Schema (Proposal)
 
-**Status:** Phase 0 proposal. **No SQL has been written or run yet.** Migrations are created in Phase 3 after you approve this design.
+**Status:** Implemented in Phase 3 as four migrations in `supabase/migrations/`, verified by 179 automated permission tests (`npm run test:db`). Not yet applied to a live Supabase project: see `docs/SUPABASE_SETUP.md`.
 **Database:** Supabase PostgreSQL. All tables in the `public` schema unless noted. Helper functions live in a private schema.
 
 ---
@@ -102,7 +102,7 @@ Constraints: `UNIQUE (profile_id, academic_year)`. Indexes: `(status)`, `(profil
 **Why separate from `profiles.role`:** a *position* (Chairperson, shown on the About page) and a *system role* (what the person may do in the admin portal) are different things.
 
 ### 3.4 `announcements`
-`id`, `title`, `slug` unique, `body`, `audience` (`visibility`), `status` (`content_status`), `is_pinned`, `published_at`, `created_by` → profiles, timestamps.
+`id`, `title`, `slug` unique, `body`, `visibility` (renamed from `audience` for consistency with other tables), `status` (`content_status`), `is_pinned`, `published_at`, `created_by` → profiles, timestamps.
 Index: `(status, published_at DESC)`.
 
 ### 3.5 `events`
@@ -183,3 +183,27 @@ Using functions avoids recursive policies on `profiles`.
 3. Should applicants (pending) be able to see member-only content? *Recommend no.*
 4. Retention periods you want (esp. rejected applications, closed accounts)?
 5. Are **guests** allowed to register for public events? *Recommend no for v1.*
+
+
+---
+
+## 7. Implementation Notes (Phase 3)
+
+**Changes from the Phase 0 proposal**
+| Change | Reason |
+|---|---|
+| `announcements.audience` renamed `visibility` | Same enum and meaning as on events, resources and opportunities |
+| Treasurer and Content Editor cannot read individual member data | Data minimisation. Treasurer gets aggregate statistics only (built in Phase 5) |
+| Contact form inserts only through `public.submit_contact_message()` | Validates input and throttles in the database: 3 per email per hour, 30 per hour overall. No service-role key needed |
+| Anonymous visitors may read only named columns of `executive_positions` | Hides the linked profile id. **Public queries must list columns; `select *` is refused** |
+| Resource, publication and opportunity categories use database enums | Sample content in the UI uses slightly different ids and will be mapped when pages read from the database |
+| Storage buckets deferred to Phase 4-5 | No upload features exist yet |
+| Certificate verification function deferred to Phase 6 | Public name exposure needs an explicit decision |
+
+**Behaviour to know**
+- **Sign-up is refused unless consent is recorded.** The database trigger rejects it even if someone calls Supabase directly. Only whitelisted metadata is read; a `role` supplied at sign-up is ignored.
+- **Roles can be changed only by Super Admin** (via `public.set_user_role`, never on yourself) or from the Supabase SQL editor. Three layers: column privileges, RLS, and a trigger.
+- **Membership approval** stamps the reviewer and time, assigns `MKUESA-00001`-style numbers, and cannot change the applicant or academic year. `expires_at` is set manually by an approver.
+- **Event registration status is chosen by the server** (`registered`, or `waitlisted` when full; the event row is locked to prevent two people taking the last seat). Waitlisted people are **not** promoted automatically when someone cancels. This is planned for Phase 4.
+- **Audit log** is written by triggers for memberships, content, certificates, officers and role changes. Nobody can insert, edit or delete entries from the app.
+- `private.purge_old_contact_messages()` deletes messages older than 12 months. It is **not scheduled yet** (Phase 8).

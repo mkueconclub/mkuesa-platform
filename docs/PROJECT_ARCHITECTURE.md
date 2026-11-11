@@ -1,6 +1,6 @@
 # MKUESA Digital Platform — Project Architecture
 
-**Status:** Phases 0-1 approved. Phase 2 (Public website) built, awaiting review.
+**Status:** Phases 0-2 approved. Phase 3 (Database and authentication) built, awaiting review.
 **Last updated:** 10 November 2026
 
 > Content marked **[SAMPLE]** or **[TO BE SUPPLIED]** is not official. No association history, names, leadership or contact details are invented anywhere in this project.
@@ -154,7 +154,7 @@ Eight roles, stored on `profiles.role`. Legend: **C** create, **R** read, **U** 
 | Capability | Super Admin | Chair | Vice Chair | Secretary | Treasurer | Membership Coord. | Content Editor | Member |
 |---|---|---|---|---|---|---|---|---|
 | Assign roles / site settings | CRUD | — | — | — | — | — | — | — |
-| Members & applications | CRUD+A | R+A | R | R | R | CRUD+A | — | own profile |
+| Members & applications | CRUD+A | R+A | R | R | — (stats only) | CRUD+A | — | own profile |
 | Events | CRUD | CRUD | CRUD | CRUD | R | R | CRU | R / register |
 | Announcements | CRUD | CRUD+A | CRUD | CRUD | R | R | CRU (draft) | R |
 | Learning resources | CRUD | CRUD | CRU | CRU | R | R | CRUD | R (member-only incl.) |
@@ -163,7 +163,7 @@ Eight roles, stored on `profiles.role`. Legend: **C** create, **R** read, **U** 
 | Certificates | CRUD | CRUD+A | CR | CR | R | CR | — | own (R) |
 | Executive info | CRUD | CRU | R | CRU | R | R | — | R (public) |
 | Contact messages | CRUD | R | R | CRU | — | — | — | — |
-| Audit logs & statistics | R | R | R | R | R (stats) | R (stats) | — | — |
+| Audit logs & statistics | R | R | R | R | — (stats only) | — (stats only) | — | — |
 
 **This matrix is a proposal.** It is a decision for you (see §9). It is implemented once, as a config map plus matching SQL policies, so changing it later is small and safe. Note: the Treasurer has little to do until payments exist; payments are **out of scope** (see Decisions).
 
@@ -291,3 +291,12 @@ Tokens live in `src/app/globals.css` (`@theme`) and are the single source of tru
 - **Missing official information** (history, objectives, constitution, membership requirements, contact details, social links) is shown as a dashed **"To be supplied"** notice. Nothing is invented.
 - **Executive names** are hidden until `showExecutiveNames` is set to `true` (consent decision from Phase 0).
 - Detail pages for resources, publications and opportunities are deferred to Phases 3-5, when real database content exists. Event detail pages (`/events/[slug]`) are built because registration depends on them.
+
+## 14. Phase 3 Decisions and Deviations
+
+- **Supabase account** is owned by `mkueconclub@gmail.com` (association-controlled, per Phase 0 advice).
+- **Registration accepts any email address** (owner decision). Spam protection relies on mandatory email confirmation and Supabase's built-in rate limits.
+- **Treasurer** sees no individual member data (data minimisation); aggregate statistics arrive in Phase 5.
+- **React Hook Form was not installed.** Server Actions with Zod validation and native form attributes cover every form so far. Reconsider in Phase 5 if forms grow complex.
+- **Turnstile and Upstash were deferred to Phase 7.** The contact form is protected by a hidden honeypot plus database throttling, which needs no extra accounts. Reconsider if abuse appears.
+- **Key naming:** Supabase now issues *publishable* keys (`sb_publishable_...`) in place of the legacy anon key. The code uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
