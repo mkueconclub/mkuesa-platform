@@ -29,6 +29,12 @@ export const contentMatrix: Record<Exclude<ContentKind, "committee">, Matrix> = 
 
 const committeeWriters: readonly UserRole[] = ["super_admin", "chairperson", "secretary"];
 
+/**
+ * Officers who can download an announcement poster. The poster is signed with the downloader's own name
+ * and title. Not enforced by the database: it only reads announcements, which every staff role may read.
+ */
+export const posterSignerRoles: readonly UserRole[] = ["chairperson", "treasurer"];
+
 export type ContentPermissions = { read: boolean; write: boolean; delete: boolean; draftOnly: boolean };
 
 export function contentPermissions(kind: ContentKind, role: UserRole): ContentPermissions {
@@ -51,8 +57,8 @@ export const can = {
   revokeCertificates: (r: UserRole) => r === "super_admin" || r === "chairperson",
   readCertificates: (r: UserRole) => staffRoles.includes(r) && r !== "content_editor",
   seeRegistrations: (r: UserRole) => leadershipRoles.includes(r),
-  readAnalytics: (r: UserRole) => memberReaderRoles.includes(r),
   readAudit: (r: UserRole) => leadershipRoles.includes(r),
+  downloadPoster: (r: UserRole) => posterSignerRoles.includes(r),
   readMessages: (r: UserRole) => leadershipRoles.includes(r),
   updateMessages: (r: UserRole) => r === "super_admin" || r === "secretary",
 };
@@ -63,7 +69,6 @@ export type AdminNavItem = { href: string; label: string };
 export function adminNavFor(role: UserRole): AdminNavItem[] {
   const items: AdminNavItem[] = [{ href: "/admin", label: "Overview" }];
   if (can.readMembers(role)) items.push({ href: "/admin/members", label: "Members" }, { href: "/admin/members/applications", label: "Applications" });
-  if (can.readAnalytics(role)) items.push({ href: "/admin/analytics", label: "Analytics" });
   items.push(
     { href: "/admin/events", label: "Events" },
     { href: "/admin/announcements", label: "Announcements" },

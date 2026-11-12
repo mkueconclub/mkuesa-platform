@@ -12,6 +12,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // The poster route reads fonts and the logo from disk at request time; make sure they ship with it.
+  outputFileTracingIncludes: {
+    "/admin/announcements/[id]/poster": ["./src/lib/poster/fonts/**/*", "./public/logos/**/*"],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

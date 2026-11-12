@@ -21,6 +21,11 @@ const sizes: Record<Size, string> = {
   lg: "h-12 px-7 text-base",
 };
 
+/** Button styling for plain `<a>` elements, e.g. file downloads, which must not go through the client router. */
+export function buttonClass(variant: Variant = "primary", size: Size = "md", className?: string) {
+  return cn(base, variants[variant], sizes[size], className);
+}
+
 type Common = { variant?: Variant; size?: Size; className?: string; children: ReactNode };
 type AsLink = Common & { href: string } & Omit<ComponentPropsWithoutRef<typeof Link>, "href" | "className" | "children">;
 type AsButton = Common & { href?: undefined } & Omit<ComponentPropsWithoutRef<"button">, "className" | "children">;
