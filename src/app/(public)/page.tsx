@@ -51,8 +51,8 @@ export default function HomePage() {
       {/* Hero */}
       <section className="bg-hero-glow relative isolate overflow-hidden text-ivory">
         <div aria-hidden className="bg-grid-light absolute inset-0 -z-10" />
-        <Container className="flex items-center justify-between gap-12 pb-28 pt-16 sm:pb-36 sm:pt-24">
-          <div className="max-w-2xl">
+        <Container className="flex items-center justify-between gap-12 pb-28 pt-16 sm:pb-36 sm:pt-24 lg:pt-28 xl:pb-44">
+          <div className="max-w-2xl xl:max-w-3xl">
             <p
               className="animate-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-accent-400"
             >
@@ -60,13 +60,13 @@ export default function HomePage() {
               {siteConfig.university}
             </p>
             <h1
-              className="animate-rise mt-6 text-balance text-5xl text-white sm:text-6xl lg:text-7xl"
+              className="animate-rise mt-6 text-balance text-5xl text-white sm:text-6xl lg:text-7xl xl:text-8xl"
               style={{ ["--delay" as string]: "80ms" }}
             >
               {siteConfig.tagline}<span className="text-accent-400">.</span>
             </h1>
             <p
-              className="animate-rise mt-6 max-w-xl text-pretty text-lg text-brand-100 sm:text-xl"
+              className="animate-rise mt-6 max-w-xl text-pretty text-lg text-brand-100 sm:text-xl xl:max-w-2xl xl:text-2xl"
               style={{ ["--delay" as string]: "160ms" }}
             >
               The {siteConfig.fullName}: connecting students with the faculty and working opportunities, and taking economics beyond the lecture room.
@@ -235,8 +235,8 @@ export default function HomePage() {
       {/* Closing call to action */}
       <section className="bg-cta-glow text-white">
         <Container className="flex flex-col items-start justify-between gap-8 py-16 sm:py-20 md:flex-row md:items-center">
-          <div className="max-w-2xl">
-            <h2 className="text-balance text-3xl sm:text-5xl">Take economics beyond the lecture room.</h2>
+          <div className="max-w-3xl">
+            <h2 className="text-balance text-3xl sm:text-5xl lg:text-6xl">Take economics beyond the lecture room.</h2>
             <p className="mt-4 text-lg text-brand-100">Join MKUESA and connect with faculty, opportunities and fellow economists.</p>
           </div>
           <Button href="/membership" variant="accent" size="lg" className="shrink-0">

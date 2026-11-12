@@ -5,7 +5,7 @@ const bars = [38, 58, 52, 80, 74, 108, 132];
 /** Decorative hero illustration: a rising economic chart with three floating "connection" chips. */
 export function HeroVisual() {
   return (
-    <div aria-hidden className="relative hidden w-full max-w-md shrink-0 lg:block xl:max-w-lg">
+    <div aria-hidden className="relative hidden w-full max-w-md shrink-0 lg:block xl:max-w-lg 2xl:max-w-2xl">
       <div className="relative rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl shadow-black/30 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand-200">Think tank in the making</span>

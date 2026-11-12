@@ -7,7 +7,7 @@ import { footerGroups, siteConfig } from "@/config/site";
 export function SiteFooter() {
   return (
     <footer className="bg-brand-950 text-brand-100">
-      <Container className="grid gap-12 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <Container className="grid gap-12 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:gap-20">
         <div className="max-w-sm">
           <BrandMark light />
           <p className="mt-5 text-sm leading-relaxed">{siteConfig.fullName}.</p>

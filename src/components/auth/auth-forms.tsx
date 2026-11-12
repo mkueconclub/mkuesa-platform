@@ -29,7 +29,7 @@ export function Status({ state }: { state: FormState }) {
 
 export function Form({ action, children }: { action: (fd: FormData) => void; children: ReactNode }) {
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form action={action} className="max-w-3xl space-y-5" noValidate>
       {children}
     </form>
   );
