@@ -2,7 +2,7 @@
 
 Official digital platform for the **Mount Kenya University Economics Students Association (MKUESA)**: a public website, member portal and administration dashboard.
 
-**Current status:** Phase 4 (member portal) built and tested up to the Supabase boundary; awaiting owner review. Phase 3 (database and authentication) is in place; a Supabase project must exist before sign-in works end to end. Public pages use official mission, vision and values plus clearly labelled sample content.
+**Current status:** Phase 5 (administration portal) built and tested up to the Supabase boundary; awaiting owner review. Phase 4 (member portal) is included. Phase 3 (database and authentication) is in place; a Supabase project must exist before sign-in works end to end. Public pages use official mission, vision and values plus clearly labelled sample content.
 
 ## Planned stack
 Next.js 16 · React 19 · TypeScript 5.9 · Tailwind CSS 4 · Supabase (Postgres, Auth, Storage) · Vercel · GitHub

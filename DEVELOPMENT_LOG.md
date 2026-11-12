@@ -191,7 +191,7 @@ Give every signed-in person a secure area to manage their details, see their mem
 |---|---|
 | `tsc --noEmit` | 0 errors |
 | `eslint src tests` | 0 problems |
-| Unit tests | **102 passing** across all 8 files (16 new: profile validation, event-ID validation, membership and event helper logic). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test` yourself. |
+| Unit tests | **102 passing** across 8 files at the end of Phase 4 (16 new: profile validation, event-ID validation, membership and event helper logic). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test` yourself. |
 
 ### Not tested (be aware)
 - **`npm run test:db` was not run** (no PostgreSQL in the build sandbox). New file `supabase/tests/t11_waitlist.sql` and migration `20261112090000_waitlist_promotion.sql` are therefore **unverified**. Run `npm run test:db` and report any failure.
@@ -210,4 +210,48 @@ Give every signed-in person a secure area to manage their details, see their mem
 3. Email notifications for registration and promotion (needs SMTP, Phase 8).
 4. Account deletion and data-export requests currently go through the contact page; consider a self-service flow for the Data Protection Act.
 5. Items pending from earlier phases: logo file, official content, executive consent, Members Coordinator name, visual review.
+
+---
+
+## Phase 5 — Administration Portal
+**Date:** 11 Nov 2026 · **Status:** Built; verified by typecheck, lint and unit tests; awaiting owner review and a live Supabase project
+
+### Objective
+Give the executive committee a protected portal to run the association: approve members, publish content, manage events and certificates, and see what is happening. Permissions are enforced by the database; the interface only hides what a role cannot use.
+
+### Completed (all under `/admin`, staff roles only; no new database migrations)
+- **Overview:** counts (accounts, pending and approved applications, upcoming events, announcements, event sign-ups, certificates, new messages) and a bar chart of applications by status. Each role sees only the numbers it is allowed to read.
+- **Members:** search by name or email, filter by role, paging, current-year membership badge. **Super Administrator only** can change roles (through the existing `set_user_role` function; nobody can change their own).
+- **Applications:** filter by status; Chairperson, Membership Coordinator and Super Administrator approve, reject (reason required, shown to the applicant), suspend, expire or reopen. The database issues membership numbers and stamps the reviewer.
+- **Events:** create, edit, delete, Nairobi-time pickers, capacity, deadline, visibility. Leadership also sees each event's registrations (registered, waitlisted, cancelled) and marks attendance.
+- **Announcements, Learning resources, Publications, Opportunities, Executive committee:** one shared form and list driven by `src/lib/admin/content-config.ts`, so all five behave the same and validate the same way.
+- **Certificates:** issue by holder email (optionally linked to an event), revoke with a reason (Super Administrator and Chairperson).
+- **Contact messages:** read and mark new / read / replied / spam (Secretary and Super Administrator update).
+- **Audit log:** latest 100 entries with who, what and status or role changes, filterable by area; leadership only.
+- **Role rules:** `src/lib/auth/permissions.ts` mirrors the SQL policies. A unit test reads the SQL and fails if they drift, and another checks every form field is a real database column.
+- Security notes: forms can only write the columns listed in each definition (no `created_by`, `role`, etc.); content is rendered as plain text; links must be http(s); content editors can only save drafts and cannot touch published items; deleting asks for confirmation.
+
+### Tests run
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint src tests` | 0 problems |
+| Unit tests | **119 passing** across 9 files (17 new). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test`. |
+
+### Not tested (be aware)
+- **No page was opened in a browser and nothing ran against Supabase.** Every database query, the Supabase embeds used for names (for example the applicant on a membership), the role-change function call and the permission refusals still need a live check.
+- `npm run build` and `npm run test:db` were not run (no network or PostgreSQL in the build sandbox). Phase 5 adds no migrations, but please run both.
+
+### Decisions and trade-offs
+- Content types share one generic form instead of five hand-written ones: far less code to maintain and consistent behaviour. A type that later needs special fields (for example file upload) gets its own page.
+- Resources are links only for now. Secure file upload and download needs a Supabase Storage bucket with policies, and is better done together in Phase 7 with the upload security review.
+- Statistics use plain count queries and CSS bars (no charting library) to keep dependencies minimal. Recharts can be added in Phase 6 for the economic dashboard.
+- The Treasurer can read content and certificates but has no financial tools; none exist in the requirements yet.
+
+### Outstanding
+1. **The public website still shows sample content** (`src/config/sample-content.ts`). Events, announcements, resources, research, opportunities and committee entries published in the admin portal do not appear on the public pages yet. Connecting them to the database is the next logical piece of work; I suggest doing it before Phase 6.
+2. Committee entries are stored with a public-consent flag, but the public About page still uses the website setting `showExecutiveNames`.
+3. Secure file uploads (resource files, publication PDFs, officer photos, certificate PDFs).
+4. Email notifications (approval, rejection, event reminders, waiting-list promotion).
+5. Everything listed as outstanding in Phase 4, and the earlier owner-supplied items (logo, official content, executive consent, Membership Coordinator name).
 
