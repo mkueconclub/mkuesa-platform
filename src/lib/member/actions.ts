@@ -1,12 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { echo, formData2obj, invalid, NOT_CONFIGURED, type FormState } from "@/lib/forms";
 import { getCurrentUser } from "@/lib/auth/session";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { fieldErrors } from "@/lib/validation/auth";
-import { eventIdSchema, profileSchema } from "@/lib/validation/member";
+import { slugify } from "@/lib/admin/content-payload";
+import { eventIdSchema, profileSchema, researchSchema } from "@/lib/validation/member";
 
 const SIGNED_OUT: FormState = { ok: false, message: "Your session has ended. Please sign in again." };
 
@@ -93,4 +95,61 @@ export async function cancelRegistrationAction(_prev: FormState, formData: FormD
   }
   revalidatePath("/dashboard", "layout");
   return { ok: true, message: "Your registration has been cancelled." };
+}
+
+export async function submitResearchAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = researchSchema.safeParse(formData2obj(formData));
+  if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
+  if (!isSupabaseConfigured()) return { ...NOT_CONFIGURED, values: echo(formData) };
+
+  const user = await getCurrentUser();
+  if (!user) return SIGNED_OUT;
+  const v = parsed.data;
+  const supabase = await createClient();
+
+  // The database insists on: your own id as author, status "submitted", type student research, an approved
+  // membership, and at most 5 submissions waiting for review. Staff review and publish from the admin portal.
+  for (let attempt = 0; ; attempt++) {
+    const slug = `${slugify(v.title)}-${Math.random().toString(36).slice(2, 7)}`;
+    const { error } = await supabase.from("research_publications").insert({
+      title: v.title,
+      slug,
+      type: "student_research",
+      author_id: user.id,
+      author_name: v.authorName,
+      abstract: v.abstract,
+      body: v.body ?? null,
+      status: "submitted",
+    });
+    if (!error) break;
+    if (error.code === "23505" && attempt < 2) continue; // slug clash: try another suffix
+    if (error.message?.includes("too_many_submissions")) {
+      return { ok: false, message: "You already have 5 submissions waiting for review. Please wait for a decision, or withdraw one.", values: echo(formData) };
+    }
+    if (error.code === "42501") {
+      return { ok: false, message: "Only approved members can submit research. Check your membership status first.", values: echo(formData) };
+    }
+    console.error("research submission failed:", error.code, error.message);
+    return { ok: false, message: "Your submission could not be saved. Please try again.", values: echo(formData) };
+  }
+  revalidatePath("/dashboard/research");
+  return { ok: true, message: "Submitted. The committee will review it and the status will update here." };
+}
+
+export async function withdrawResearchAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const parsed = z.object({ id: z.uuid() }).safeParse(formData2obj(formData));
+  if (!parsed.success) return { ok: false, message: "That submission could not be found." };
+  if (!isSupabaseConfigured()) return NOT_CONFIGURED;
+
+  const user = await getCurrentUser();
+  if (!user) return SIGNED_OUT;
+  const supabase = await createClient();
+  // Only your own, and only while nobody has started reviewing it (enforced by the database).
+  const { data, error } = await supabase.from("research_publications").delete().eq("id", parsed.data.id).eq("author_id", user.id).eq("status", "submitted").select("id");
+  if (error || !data?.length) {
+    if (error) console.error("withdraw research failed:", error.code, error.message);
+    return { ok: false, message: "This submission can no longer be withdrawn." };
+  }
+  revalidatePath("/dashboard/research");
+  return { ok: true, message: "Submission withdrawn." };
 }

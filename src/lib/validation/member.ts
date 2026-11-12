@@ -28,3 +28,16 @@ export const profileSchema = z.object({
 });
 
 export const eventIdSchema = z.object({ eventId: z.uuid("Unknown event.") });
+
+// Student research submission. Plain text only; files arrive with secure storage in a later phase.
+export const researchSchema = z.object({
+  title: z.string().trim().min(3, "Enter a title of at least 3 characters.").max(250, "Use 250 characters or fewer."),
+  authorName: z.string().trim().min(2, "Enter the author name(s).").max(120, "Use 120 characters or fewer."),
+  abstract: z.string().trim().min(50, "Write an abstract of at least 50 characters.").max(3000, "Use 3,000 characters or fewer."),
+  body: z
+    .string()
+    .trim()
+    .max(100000, "Use 100,000 characters or fewer.")
+    .optional()
+    .transform((v) => v || undefined),
+});

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Award, BadgeCheck, BookOpen, CalendarDays, LayoutDashboard, Megaphone, User } from "lucide-react";
+import { Award, BadgeCheck, BookOpen, CalendarDays, FileText, LayoutDashboard, Megaphone, User } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { href: "/dashboard/membership", label: "Membership", icon: BadgeCheck },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
   { href: "/dashboard/resources", label: "Resources", icon: BookOpen },
+  { href: "/dashboard/research", label: "My research", icon: FileText },
   { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
   { href: "/dashboard/certificates", label: "Certificates", icon: Award },
 ] as const;

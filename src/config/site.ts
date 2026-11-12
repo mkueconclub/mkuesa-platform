@@ -11,6 +11,15 @@ export const siteConfig = {
   logo: "/logos/mkuesa-logo-original-400.jpg",
 } as const;
 
+/** National body MKUESA is a member of (listed in KESA's public member directory). */
+export const affiliation = {
+  name: "Kenya Economics Students Association",
+  short: "KESA",
+  url: "https://www.kesakenya.org/",
+  // Save KESA's logo (https://www.kesakenya.org/pictures/logo.jpg) here. A "KESA" monogram shows until it exists.
+  logo: "/logos/kesa-logo.jpg",
+} as const;
+
 export const mainNav: readonly NavItem[] = [
   { label: "About", href: "/about" },
   { label: "Membership", href: "/membership" },

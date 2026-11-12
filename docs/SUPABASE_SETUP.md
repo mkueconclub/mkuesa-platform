@@ -36,6 +36,9 @@ Open **SQL Editor → New query**. For each file below, in this order: open it o
 2. `supabase/migrations/20261110090100_helpers_and_triggers.sql`
 3. `supabase/migrations/20261110090200_rls_and_privileges.sql`
 4. `supabase/migrations/20261110090300_public_functions.sql`
+5. `supabase/migrations/20261111090000_auth_trigger_grants.sql`
+6. `supabase/migrations/20261112090000_waitlist_promotion.sql`
+7. `supabase/migrations/20261113090000_phase6_advanced.sql`
 
 If any file shows an error, **stop and send me the exact message** before running anything again.
 

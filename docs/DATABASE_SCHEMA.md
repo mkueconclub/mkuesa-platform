@@ -207,3 +207,16 @@ Using functions avoids recursive policies on `profiles`.
 - **Event registration status is chosen by the server** (`registered`, or `waitlisted` when full; the event row is locked to prevent two people taking the last seat). Waitlisted people are **not** promoted automatically when someone cancels. This is planned for Phase 4.
 - **Audit log** is written by triggers for memberships, content, certificates, officers and role changes. Nobody can insert, edit or delete entries from the app.
 - `private.purge_old_contact_messages()` deletes messages older than 12 months. It is **not scheduled yet** (Phase 8).
+
+## 8. Additions after Phase 3
+
+No tables were added. Later phases add only functions, triggers and policies, so the table list above is still complete (a test asserts exactly 12 public tables).
+
+| Migration | What it adds | Why |
+|---|---|---|
+| `20261111090000_auth_trigger_grants` | Grants the Supabase auth role access to the sign-up trigger functions | Precaution against "Database error saving new user" after the private schema was locked down |
+| `20261112090000_waitlist_promotion` | Trigger `private.promote_waitlist` on `event_registrations` | When a confirmed place is freed (cancelled or deleted), the longest-waiting person is promoted. Locks the event row so two cancellations cannot promote the same person |
+| `20261113090000_phase6_advanced` | `public.verify_certificate(code)` | Public certificate check. Returns status, title, type, date, a **masked** holder name ("Amina O.") and the event title only if that event is public. Never an email, id or revocation reason. Codes are 128-bit random |
+| | Policies `research_member_submit`, `research_member_withdraw` and trigger `private.limit_pending_submissions` on `research_publications` | An approved member may submit their own research, always as `submitted` and never pre-reviewed; may withdraw it until review starts; at most 5 waiting at once (a trigger, so one bulk request cannot exceed it) |
+| | `public.admin_analytics()` | One aggregate call for the committee charts: applications per month, event participation, members by year and programme. Callable only by roles that may already read member data. Programmes with fewer than 3 members are merged so no one can be picked out |
+

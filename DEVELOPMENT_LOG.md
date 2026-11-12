@@ -255,3 +255,52 @@ Give the executive committee a protected portal to run the association: approve 
 4. Email notifications (approval, rejection, event reminders, waiting-list promotion).
 5. Everything listed as outstanding in Phase 4, and the earlier owner-supplied items (logo, official content, executive consent, Membership Coordinator name).
 
+---
+
+## Phase 6 — Advanced Features
+**Date:** 12 Nov 2026 · **Status:** Built; verified by typecheck, lint and unit tests; awaiting owner review and a live Supabase project
+
+### Objective
+Add only the advanced features that have a clear purpose, can be maintained by a student committee, and need no outside accounts or invented data.
+
+### Chosen, with reasons
+| Feature | Why it is in |
+|---|---|
+| **Digital certificates with verification** | Certificates are only worth something if a third party (an employer, a lecturer) can check them. Public `/verify` and `/verify/<code>` pages; members can print or save their certificate as a PDF from `/dashboard/certificates/<id>`. |
+| **Student research submissions** | Directly serves the "student research" part of the brief and feeds the Research page. Approved members submit at `/dashboard/research`; the committee reviews and publishes in the existing admin Publications screen. |
+| **Advanced analytics** | The committee can see membership growth, event attendance and who the members are (year, programme) at `/admin/analytics`, using only data the platform already holds. |
+| **Research page now reads the database** | Needed so published student work actually appears. `/research` and `/research/<slug>` show real published work when Supabase is configured, and clearly labelled sample content when it is not. |
+
+### Deliberately not built (and what I need from you)
+| Feature | Why not yet |
+|---|---|
+| Economic intelligence dashboard / interactive economic charts | It needs a trustworthy data source (for example CBK or KNBS series) and a decision about licensing and who keeps it up to date. I will not invent figures. Tell me the indicators you want and where the numbers come from, and I will build it. |
+| Newsletter integration | Needs an email service account (Mailchimp, Brevo, Resend...) and your decision on consent wording. |
+| Inter-university competitions | Needs your rules: who may enter, team or individual, judging, partner universities. Better designed with the committee than guessed. |
+
+### Completed
+- **Verification:** the database function returns status (valid / revoked), title, type, issue date, a masked holder name ("Amina O.") and the event only if it is public. No email, id or revoke reason. Codes are 128-bit random, so they cannot be guessed. Pages are not indexed by search engines and always read the live record.
+- **Printing:** a print-only style shows just the certificate on a landscape A4 page, with its verification web address and code. "Save as PDF" in the print window gives a PDF with no extra library. A QR code was left out to avoid a dependency; it is a small addition if wanted.
+- **Submissions:** plain text only; the database insists on your own id as author, status "submitted", type student research, an approved membership, never pre-published or pre-reviewed; at most 5 waiting for review (enforced by a trigger so a bulk request cannot exceed it); withdraw until review starts. Published work is shown as plain text, never HTML.
+- **Analytics:** one database call returns the numbers (the API only returns 1,000 rows per request, so counting in the app would be wrong for larger data). Charts are plain SVG with a hidden data table for screen readers; no charting library added. Programmes with fewer than 3 members are merged so nobody can be identified. Visible to leadership and the Membership Coordinator only.
+- **Migration** `20261113090000_phase6_advanced.sql`: no new tables.
+
+### Tests run
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint src tests` | 0 problems |
+| Unit tests | **148 passing** across 10 files (29 new: certificate codes, chart scale, analytics parsing, research validation, access rules, and checks on the migration text such as pinned search paths and what visitors may call). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test`. |
+
+### Not tested (be aware)
+- **`supabase/tests/t12_phase6.sql` was written but not run** (no PostgreSQL in the build sandbox), and neither was the migration itself. Run `npm run test:db` and report any failure; the earlier `t11` waiting-list test is also unrun.
+- **No page was opened in a browser and nothing ran against Supabase.** In particular please check by hand: a certificate verifies and a revoked one says so; print preview looks right; a member submits and withdraws research; staff publish it and it appears on `/research`; the analytics page loads.
+- `npm run build` was not run (no network in the build sandbox).
+
+### Outstanding
+1. Run the database tests and the manual checks above.
+2. **The rest of the public site still shows sample content** (home, events, learning hub, opportunities, about). Research is now live; the same pattern should be applied to the others. Recommended next piece of work before Phase 7.
+3. Decisions needed from you for the deferred features above.
+4. File uploads (resource files, publication PDFs, officer photos) and email notifications remain open from earlier phases.
+5. Earlier owner-supplied items: logo, official content, executive consent, Membership Coordinator name.
+

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Award } from "lucide-react";
 import { PageTitle } from "@/components/dashboard/page-title";
 import { Card } from "@/components/ui/card";
@@ -34,6 +35,7 @@ export default async function CertificatesPage() {
                 <p className="mt-3 text-sm text-muted">Issued {formatEventDate(c.issued_at)}</p>
                 <p className="mt-1 text-sm text-muted">Verification code</p>
                 <p className="break-all font-mono text-sm">{c.verification_code}</p>
+                <Link href={`/dashboard/certificates/${c.id}`} className="mt-4 inline-block text-sm font-semibold text-brand-700 hover:underline">View, print or save as PDF</Link>
               </Card>
             </li>
           ))}
@@ -41,7 +43,7 @@ export default async function CertificatesPage() {
       ) : (
         <Card><p className="text-muted">You have no certificates yet. Certificates are issued by the association for events and activities you take part in.</p></Card>
       )}
-      <p className="mt-6 max-w-2xl text-sm text-muted">Downloadable certificate files and public verification pages are planned for a later phase.</p>
+      <p className="mt-6 max-w-2xl text-sm text-muted">Anyone can check a certificate at <Link href="/verify" className="underline">the verification page</Link> using its code.</p>
     </>
   );
 }

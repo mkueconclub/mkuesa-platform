@@ -51,6 +51,7 @@ export const can = {
   revokeCertificates: (r: UserRole) => r === "super_admin" || r === "chairperson",
   readCertificates: (r: UserRole) => staffRoles.includes(r) && r !== "content_editor",
   seeRegistrations: (r: UserRole) => leadershipRoles.includes(r),
+  readAnalytics: (r: UserRole) => memberReaderRoles.includes(r),
   readAudit: (r: UserRole) => leadershipRoles.includes(r),
   readMessages: (r: UserRole) => leadershipRoles.includes(r),
   updateMessages: (r: UserRole) => r === "super_admin" || r === "secretary",
@@ -62,6 +63,7 @@ export type AdminNavItem = { href: string; label: string };
 export function adminNavFor(role: UserRole): AdminNavItem[] {
   const items: AdminNavItem[] = [{ href: "/admin", label: "Overview" }];
   if (can.readMembers(role)) items.push({ href: "/admin/members", label: "Members" }, { href: "/admin/members/applications", label: "Applications" });
+  if (can.readAnalytics(role)) items.push({ href: "/admin/analytics", label: "Analytics" });
   items.push(
     { href: "/admin/events", label: "Events" },
     { href: "/admin/announcements", label: "Announcements" },

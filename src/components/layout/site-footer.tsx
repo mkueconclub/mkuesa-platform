@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AffiliationFooter } from "@/components/layout/affiliation-badge";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Container } from "@/components/ui/container";
 import { footerGroups, siteConfig } from "@/config/site";
@@ -11,6 +12,7 @@ export function SiteFooter() {
           <BrandMark light />
           <p className="mt-5 text-sm leading-relaxed">{siteConfig.fullName}.</p>
           <p className="mt-1 font-display text-lg italic text-accent-400">{siteConfig.tagline}</p>
+          <AffiliationFooter />
         </div>
 
         {footerGroups.map((group) => (

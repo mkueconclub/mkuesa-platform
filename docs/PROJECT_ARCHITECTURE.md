@@ -1,6 +1,6 @@
 # MKUESA Digital Platform — Project Architecture
 
-**Status:** Phases 0-3 approved. Phases 4 (Member portal) and 5 (Administration portal) built, awaiting review.
+**Status:** Phases 0-3 approved. Phases 4 (Member portal), 5 (Administration portal) and 6 (Advanced features) built, awaiting review.
 **Last updated:** 10 November 2026
 
 > Content marked **[SAMPLE]** or **[TO BE SUPPLIED]** is not official. No association history, names, leadership or contact details are invented anywhere in this project.

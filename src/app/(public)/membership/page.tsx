@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Award, BookOpen, Briefcase, CalendarDays, GraduationCap, Lightbulb } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Award, BookOpen, Briefcase, CalendarDays, GraduationCap, Lightbulb } from "lucide-react";
 import { PageHeader } from "@/components/public/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -64,8 +65,15 @@ export default function MembershipPage() {
           ))}
         </ol>
         <div className="mt-8 flex flex-wrap items-center gap-4">
-          <Button disabled>Registration opens soon</Button>
-          <p className="text-sm text-muted">Online registration launches with the member portal.</p>
+          <Button href="/register" size="lg">
+            Join us <ArrowRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </Button>
+          <p className="text-sm text-muted">
+            Already have an account?{" "}
+            <Link href="/login" className="font-semibold text-brand-700 hover:underline">
+              Member login
+            </Link>
+          </p>
         </div>
       </Section>
     </>
