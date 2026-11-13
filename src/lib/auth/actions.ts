@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { currentAcademicYear, privacyNoticeVersion } from "@/config/association";
+import { siteConfig } from "@/config/site";
 import { safeNext } from "@/lib/auth/redirect";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +21,16 @@ import {
 
 export type { FormState };
 
+/** The address of this site as the visitor sees it (works on localhost, preview deployments and production). */
+async function siteOrigin(): Promise<string> {
+  const h = await headers();
+  const origin = h.get("origin");
+  if (origin) return origin;
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (host) return `${h.get("x-forwarded-proto") ?? "https"}://${host}`;
+  return siteConfig.url;
+}
+
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = registerSchema.safeParse(formData2obj(formData));
   if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
@@ -26,12 +38,15 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   if (!isSupabaseConfigured()) return { ...NOT_CONFIGURED, values: echo(formData) };
 
   const supabase = await createClient();
+  const origin = await siteOrigin();
   let result;
   try {
     result = await supabase.auth.signUp({
     email: v.email,
     password: v.password,
     options: {
+      // After the email link is opened the person lands on "Email verified" (see /auth/confirm).
+      emailRedirectTo: `${origin}/auth/confirm?next=/auth/verified`,
       data: {
         full_name: v.fullName,
         programme: v.programme ?? "",
@@ -96,7 +111,11 @@ export async function requestPasswordResetAction(_prev: FormState, formData: For
   const parsed = resetRequestSchema.safeParse(formData2obj(formData));
   if (!parsed.success) return invalid(fieldErrors(parsed.error), formData);
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email);
+  const origin = await siteOrigin();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    // The link signs the person in briefly, then /auth/confirm opens the "choose a new password" page.
+    redirectTo: `${origin}/auth/confirm?type=recovery&next=/reset-password/update`,
+  });
   if (error) console.error("reset request failed:", error.code ?? error.name);
   return { ok: true, message: "If an account exists for that address, a reset link has been sent." };
 }

@@ -53,8 +53,9 @@ Check: **Table Editor** should list 12 tables (profiles, memberships, announceme
 - Minimum password length: **10**
 
 **Authentication → URL Configuration**
-- Site URL: `http://localhost:3000` (change to the real domain at launch)
-- Redirect URLs: add `http://localhost:3000/**`
+- Site URL: the live address, e.g. `https://mkuesa-platform.vercel.app` (use `http://localhost:3000` only while developing locally)
+- Redirect URLs: add **both** `https://mkuesa-platform.vercel.app/**` and `http://localhost:3000/**`
+  (an address missing from this list makes Supabase send every email link to the home page instead)
 
 ## 6. Email templates (required)
 **Authentication → Email Templates.** Replace the link in each template so it goes through the website:
@@ -62,7 +63,7 @@ Check: **Table Editor** should list 12 tables (profiles, memberships, announceme
 *Confirm sign up*
 ```html
 <h2>Confirm your email</h2>
-<p>Welcome to MKUESA. <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/dashboard">Confirm your email address</a></p>
+<p>Welcome to MKUESA. <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/auth/verified">Confirm your email address</a></p>
 ```
 *Reset password*
 ```html
@@ -70,6 +71,15 @@ Check: **Table Editor** should list 12 tables (profiles, memberships, announceme
 <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password/update">Choose a new password</a></p>
 <p>If you did not ask for this, ignore this email.</p>
 ```
+
+If you leave the default templates in place the links still work, because the site passes its own redirect address
+when it sends the email. The custom templates above are still preferred: they also work when a student opens the
+email on a different phone or browser than the one they registered on.
+
+After saving the templates, request a **new** email to test. Links in emails sent earlier keep the old address.
+
+Troubleshooting: a link that opens the home page means the Redirect URLs list (section 5) is missing the live
+address, or the Site URL still points to `localhost`.
 
 ## 7. Outgoing email (required before students can register)
 Supabase's built-in email sender only delivers to your own team members, so students would never receive confirmation emails.
