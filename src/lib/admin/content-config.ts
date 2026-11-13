@@ -254,7 +254,7 @@ export const contentConfigs: Record<ContentKind, ContentConfig> = {
     basePath: "/admin/committee",
     label: "Executive committee",
     singular: "committee entry",
-    description: "Who holds each position. A name is shown publicly only when the officer has consented AND the website setting allows it.",
+    description: "Who holds each position. Only the Super Administrator can approve an entry: an approved officer appears on the About page and can add their own contact email.",
     titleField: "display_name",
     hasSlug: false,
     statusField: null,
@@ -265,7 +265,7 @@ export const contentConfigs: Record<ContentKind, ContentConfig> = {
       { name: "term_label", label: "Term (e.g. 2026/2027)", type: "text", max: 20 },
       { name: "display_order", label: "Display order", type: "number", required: true, min: 0, max: 1000, hint: "Lower numbers appear first." },
       { name: "is_current", label: "Currently serving", type: "checkbox" },
-      { name: "public_consent", label: "This officer has consented to their name being shown publicly", type: "checkbox" },
+      { name: "public_consent", label: "Approved by the Super Administrator", type: "checkbox" }, // set by the approval card, never by this form
     ],
     defaults: { display_order: "0", is_current: "on" },
     list: [

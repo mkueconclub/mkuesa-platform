@@ -64,7 +64,7 @@ describe("server and client separation", () => {
 });
 
 // Actions that are open to visitors on purpose (everything else must check who is calling).
-const PUBLIC_ACTIONS = new Set(["registerAction", "loginAction", "logoutAction", "requestPasswordResetAction", "submitContactAction"]);
+const PUBLIC_ACTIONS = new Set(["registerAction", "loginAction", "logoutAction", "requestPasswordResetAction", "submitContactAction", "sendExecutiveMessageAction"]);
 const GUARDS = ["requireProfile(", "requireUser(", "getCurrentUser(", "auth.getUser("];
 
 describe("server actions check who is calling", () => {

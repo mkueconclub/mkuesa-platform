@@ -62,6 +62,10 @@ export const can = {
   downloadPoster: (r: UserRole) => posterSignerRoles.includes(r),
   readMessages: (r: UserRole) => leadershipRoles.includes(r),
   updateMessages: (r: UserRole) => r === "super_admin" || r === "secretary",
+  /** Only the Super Administrator approves an officer (links the entry to their account and publishes it). */
+  approveExecutives: (r: UserRole) => r === "super_admin",
+  /** Officers keep their own public profile and inbox. The database ties both to the officer's own entry. */
+  useExecutiveProfile: (r: UserRole) => staffRoles.includes(r) && r !== "content_editor",
 };
 
 export type AdminNavItem = { href: string; label: string };
@@ -83,6 +87,7 @@ export function adminNavFor(role: UserRole): AdminNavItem[] {
   if (can.readCertificates(role)) items.push({ href: "/admin/certificates", label: "Certificates" });
   if (leadershipRoles.includes(role)) items.push({ href: "/admin/alumni", label: "Alumni review" });
   items.push({ href: "/admin/committee", label: "Committee" });
+  if (can.useExecutiveProfile(role)) items.push({ href: "/admin/executive-profile", label: "My officer profile" }, { href: "/admin/executive-inbox", label: "My inbox" });
   if (can.readMessages(role)) items.push({ href: "/admin/messages", label: "Messages" });
   if (can.readAudit(role)) items.push({ href: "/admin/audit", label: "Audit log" });
   return items;

@@ -36,6 +36,8 @@ export async function saveContentAction(_prev: FormState, fd: FormData): Promise
 
   const parsed = parseContent(cfg, fd, { allowedStatuses: perms.draftOnly ? ["draft"] : undefined });
   if (!parsed.ok) return invalid(parsed.errors, fd);
+  // Approving an officer is a Super Administrator decision made on its own card (approveExecutiveAction), never through this form.
+  if (cfg.kind === "committee") delete parsed.data.public_consent;
 
   const supabase = await createClient();
   const idRaw = fd.get("id");

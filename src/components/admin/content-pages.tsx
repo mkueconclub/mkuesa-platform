@@ -18,6 +18,9 @@ import { formatDay, formatEventDate, toNairobiInput } from "@/lib/utils/date";
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const human = (v: unknown) => String(v).replace(/_/g, " ");
 
+/** The committee's approval flag is changed on its own card by the Super Administrator, so it is not a form field. */
+const formFields = (cfg: ContentConfig) => cfg.fields.filter((f) => !(cfg.kind === "committee" && f.name === "public_consent"));
+
 type Row = Record<string, unknown>;
 
 function cell(type: string | undefined, value: unknown) {
@@ -114,7 +117,7 @@ export async function ContentNewPage({ kind }: { kind: ContentKind }) {
       <div className="mt-4"><PageTitle eyebrow="Administration" title={`New ${cfg.singular}`} /></div>
       {perms.write ? (
         <Card>
-          <ContentForm kind={kind} fields={cfg.fields} initial={cfg.defaults} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel={`Create ${cfg.singular}`} />
+          <ContentForm kind={kind} fields={formFields(cfg)} initial={cfg.defaults} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel={`Create ${cfg.singular}`} />
         </Card>
       ) : (
         <Notice>Your role cannot create this.</Notice>
@@ -144,7 +147,7 @@ export async function ContentEditPage({ kind, id, extra }: { kind: ContentKind; 
         {lockedForEditor && <Notice tone="pending">This {cfg.singular} is no longer a draft, so only an officer can change it.</Notice>}
         {perms.write && !lockedForEditor && (
           <Card>
-            <ContentForm kind={kind} id={id} fields={cfg.fields} initial={toInitial(cfg.fields, row)} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel="Save changes" />
+            <ContentForm kind={kind} id={id} fields={formFields(cfg)} initial={toInitial(cfg.fields, row)} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel="Save changes" />
           </Card>
         )}
         {kind === "announcements" && can.downloadPoster(profile.role) && (

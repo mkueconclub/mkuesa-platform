@@ -1,0 +1,196 @@
+diff --git a/src/app/(public)/about/page.tsx b/src/app/(public)/about/page.tsx
+index 29157a9..256b5a9 100644
+--- a/src/app/(public)/about/page.tsx
++++ b/src/app/(public)/about/page.tsx
+@@ -1,18 +1,28 @@
+ import type { Metadata } from "next";
++import Link from "next/link";
++import { ArrowRight } from "lucide-react";
+ import { PageHeader } from "@/components/public/page-header";
+ import { Card } from "@/components/ui/card";
+ import { Section } from "@/components/ui/section";
+ import { association, contact, visibleCommittee } from "@/config/association";
+ import { affiliation, siteConfig } from "@/config/site";
++import { canBeContacted, initials } from "@/lib/executives/profile";
++import { getPublicExecutives } from "@/lib/executives/queries";
++
++export const dynamic = "force-dynamic";
+ 
+ export const metadata: Metadata = {
+   title: "About",
+   description: `${siteConfig.fullName}: our mission, vision, values and leadership.`,
+ };
+ 
+-export default function AboutPage() {
+-  const committee = visibleCommittee();
+-  const named = committee.some((m) => m.name);
++export default async function AboutPage() {
++  // Officers the Super Administrator has approved. Offices with nobody approved yet are listed by title only.
++  const approved = await getPublicExecutives();
++  const approvedTitles = new Set(approved.map((e) => e.position_title.toLowerCase()));
++  const pending = visibleCommittee().filter((m) => !approvedTitles.has(m.title.toLowerCase()));
++  const named = pending.some((m) => m.name);
++  const offices = approved.length + pending.length;
+   return (
+     <>
+       <PageHeader eyebrow="About" title={`About ${siteConfig.name}`} description={siteConfig.fullName} />
+@@ -53,11 +63,35 @@ export default function AboutPage() {
+ 
+       <Section eyebrow="Leadership" title="Executive committee">
+         <p className="mb-8 max-w-3xl text-lg">
+-          The association is led by an executive committee of {committee.length} offices. To reach the committee, write to{" "}
++          The association is led by an executive committee of {offices} offices. Select an officer to read their profile and write to them directly. To reach the whole committee, write to{" "}
+           <a href={`mailto:${contact.email}`} className="font-semibold text-brand-700 underline">{contact.email}</a>.
+         </p>
+         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+-          {committee.map((m) => (
++          {approved.map((e) => (
++            <li key={e.id}>
++              {canBeContacted(e) ? (
++                <Link href={`/about/executives/${e.id}`} className="block h-full rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2">
++                  <Card interactive className="flex h-full items-center gap-4">
++                    <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-700 font-display text-xl text-white">{initials(e.display_name)}</span>
++                    <span className="min-w-0 flex-1">
++                      <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-accent-700">{e.position_title}</span>
++                      <span className="mt-1 block font-display text-2xl text-brand-900">{e.display_name}</span>
++                      <span className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-brand-700">View profile and contact<ArrowRight aria-hidden className="size-4" /></span>
++                    </span>
++                  </Card>
++                </Link>
++              ) : (
++                <Card className="flex h-full items-center gap-4">
++                  <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-700 font-display text-xl text-white">{initials(e.display_name)}</span>
++                  <span className="min-w-0 flex-1">
++                    <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-accent-700">{e.position_title}</span>
++                    <span className="mt-1 block font-display text-2xl text-brand-900">{e.display_name}</span>
++                  </span>
++                </Card>
++              )}
++            </li>
++          ))}
++          {pending.map((m) => (
+             <li key={m.title}>
+               <Card>
+                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-700">{m.title}</p>
+diff --git a/src/app/admin/committee/[id]/page.tsx b/src/app/admin/committee/[id]/page.tsx
+index 36a6177..17d07ed 100644
+--- a/src/app/admin/committee/[id]/page.tsx
++++ b/src/app/admin/committee/[id]/page.tsx
+@@ -1,9 +1,13 @@
+ import type { Metadata } from "next";
+ import { ContentEditPage } from "@/components/admin/content-pages";
++import { ExecutiveApprovalCard } from "@/components/executives/approval-card";
++import { staffRoles } from "@/lib/auth/roles";
++import { requireRole } from "@/lib/auth/session";
+ 
+ export const metadata: Metadata = { title: "Edit (admin)", robots: { index: false, follow: false } };
+ 
+ export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+   const { id } = await params;
+-  return <ContentEditPage kind="committee" id={id} />;
++  const me = await requireRole(staffRoles, `/admin/committee/${id}`);
++  return <ContentEditPage kind="committee" id={id} extra={<ExecutiveApprovalCard id={id} role={me.role} />} />;
+ }
+diff --git a/src/components/admin/content-pages.tsx b/src/components/admin/content-pages.tsx
+index cd1229d..b47cef0 100644
+--- a/src/components/admin/content-pages.tsx
++++ b/src/components/admin/content-pages.tsx
+@@ -18,6 +18,9 @@ import { formatDay, formatEventDate, toNairobiInput } from "@/lib/utils/date";
+ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+ const human = (v: unknown) => String(v).replace(/_/g, " ");
+ 
++/** The committee's approval flag is changed on its own card by the Super Administrator, so it is not a form field. */
++const formFields = (cfg: ContentConfig) => cfg.fields.filter((f) => !(cfg.kind === "committee" && f.name === "public_consent"));
++
+ type Row = Record<string, unknown>;
+ 
+ function cell(type: string | undefined, value: unknown) {
+@@ -114,7 +117,7 @@ export async function ContentNewPage({ kind }: { kind: ContentKind }) {
+       <div className="mt-4"><PageTitle eyebrow="Administration" title={`New ${cfg.singular}`} /></div>
+       {perms.write ? (
+         <Card>
+-          <ContentForm kind={kind} fields={cfg.fields} initial={cfg.defaults} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel={`Create ${cfg.singular}`} />
++          <ContentForm kind={kind} fields={formFields(cfg)} initial={cfg.defaults} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel={`Create ${cfg.singular}`} />
+         </Card>
+       ) : (
+         <Notice>Your role cannot create this.</Notice>
+@@ -144,7 +147,7 @@ export async function ContentEditPage({ kind, id, extra }: { kind: ContentKind;
+         {lockedForEditor && <Notice tone="pending">This {cfg.singular} is no longer a draft, so only an officer can change it.</Notice>}
+         {perms.write && !lockedForEditor && (
+           <Card>
+-            <ContentForm kind={kind} id={id} fields={cfg.fields} initial={toInitial(cfg.fields, row)} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel="Save changes" />
++            <ContentForm kind={kind} id={id} fields={formFields(cfg)} initial={toInitial(cfg.fields, row)} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel="Save changes" />
+           </Card>
+         )}
+         {kind === "announcements" && can.downloadPoster(profile.role) && (
+diff --git a/src/lib/admin/actions.ts b/src/lib/admin/actions.ts
+index 3870894..e90c777 100644
+--- a/src/lib/admin/actions.ts
++++ b/src/lib/admin/actions.ts
+@@ -36,6 +36,8 @@ export async function saveContentAction(_prev: FormState, fd: FormData): Promise
+ 
+   const parsed = parseContent(cfg, fd, { allowedStatuses: perms.draftOnly ? ["draft"] : undefined });
+   if (!parsed.ok) return invalid(parsed.errors, fd);
++  // Approving an officer is a Super Administrator decision made on its own card (approveExecutiveAction), never through this form.
++  if (cfg.kind === "committee") delete parsed.data.public_consent;
+ 
+   const supabase = await createClient();
+   const idRaw = fd.get("id");
+diff --git a/src/lib/admin/content-config.ts b/src/lib/admin/content-config.ts
+index 85f4a9f..08d83f9 100644
+--- a/src/lib/admin/content-config.ts
++++ b/src/lib/admin/content-config.ts
+@@ -254,7 +254,7 @@ export const contentConfigs: Record<ContentKind, ContentConfig> = {
+     basePath: "/admin/committee",
+     label: "Executive committee",
+     singular: "committee entry",
+-    description: "Who holds each position. A name is shown publicly only when the officer has consented AND the website setting allows it.",
++    description: "Who holds each position. Only the Super Administrator can approve an entry: an approved officer appears on the About page and can add their own contact email.",
+     titleField: "display_name",
+     hasSlug: false,
+     statusField: null,
+@@ -265,7 +265,7 @@ export const contentConfigs: Record<ContentKind, ContentConfig> = {
+       { name: "term_label", label: "Term (e.g. 2026/2027)", type: "text", max: 20 },
+       { name: "display_order", label: "Display order", type: "number", required: true, min: 0, max: 1000, hint: "Lower numbers appear first." },
+       { name: "is_current", label: "Currently serving", type: "checkbox" },
+-      { name: "public_consent", label: "This officer has consented to their name being shown publicly", type: "checkbox" },
++      { name: "public_consent", label: "Approved by the Super Administrator", type: "checkbox" }, // set by the approval card, never by this form
+     ],
+     defaults: { display_order: "0", is_current: "on" },
+     list: [
+diff --git a/src/lib/auth/permissions.ts b/src/lib/auth/permissions.ts
+index 56a3e3b..229ad41 100644
+--- a/src/lib/auth/permissions.ts
++++ b/src/lib/auth/permissions.ts
+@@ -62,6 +62,10 @@ export const can = {
+   downloadPoster: (r: UserRole) => posterSignerRoles.includes(r),
+   readMessages: (r: UserRole) => leadershipRoles.includes(r),
+   updateMessages: (r: UserRole) => r === "super_admin" || r === "secretary",
++  /** Only the Super Administrator approves an officer (links the entry to their account and publishes it). */
++  approveExecutives: (r: UserRole) => r === "super_admin",
++  /** Officers keep their own public profile and inbox. The database ties both to the officer's own entry. */
++  useExecutiveProfile: (r: UserRole) => staffRoles.includes(r) && r !== "content_editor",
+ };
+ 
+ export type AdminNavItem = { href: string; label: string };
+@@ -83,6 +87,7 @@ export function adminNavFor(role: UserRole): AdminNavItem[] {
+   if (can.readCertificates(role)) items.push({ href: "/admin/certificates", label: "Certificates" });
+   if (leadershipRoles.includes(role)) items.push({ href: "/admin/alumni", label: "Alumni review" });
+   items.push({ href: "/admin/committee", label: "Committee" });
++  if (can.useExecutiveProfile(role)) items.push({ href: "/admin/executive-profile", label: "My officer profile" }, { href: "/admin/executive-inbox", label: "My inbox" });
+   if (can.readMessages(role)) items.push({ href: "/admin/messages", label: "Messages" });
+   if (can.readAudit(role)) items.push({ href: "/admin/audit", label: "Audit log" });
+   return items;
+diff --git a/tests/security.test.ts b/tests/security.test.ts
+index 47d0ded..1ec2b27 100644
+--- a/tests/security.test.ts
++++ b/tests/security.test.ts
+@@ -64,7 +64,7 @@ describe("server and client separation", () => {
+ });
+ 
+ // Actions that are open to visitors on purpose (everything else must check who is calling).
+-const PUBLIC_ACTIONS = new Set(["registerAction", "loginAction", "logoutAction", "requestPasswordResetAction", "submitContactAction"]);
++const PUBLIC_ACTIONS = new Set(["registerAction", "loginAction", "logoutAction", "requestPasswordResetAction", "submitContactAction", "sendExecutiveMessageAction"]);
+ const GUARDS = ["requireProfile(", "requireUser(", "getCurrentUser(", "auth.getUser("];
+ 
+ describe("server actions check who is calling", () => {
