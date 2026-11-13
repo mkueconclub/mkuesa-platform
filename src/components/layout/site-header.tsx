@@ -19,7 +19,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
   const [open, setOpen] = useState(false);
   // On desktop the top bar hands over to the floating side dock as soon as the page scrolls.
   const docked = useScrolledPast(40);
-  const isDesktop = useMediaQuery("(min-width: 80rem)");
+  const isDesktop = useMediaQuery("(min-width: 96rem)");
   const hidden = docked && isDesktop;
 
   useEffect(() => {
@@ -36,22 +36,22 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
       <header
         inert={hidden}
         className={cn(
-          "sticky top-0 z-40 border-b border-brand-100 bg-ivory/95 backdrop-blur transition-all duration-500 ease-out-expo",
+          "sticky top-0 z-40 border-b border-brand-100/80 bg-white/95 shadow-[0_8px_30px_-24px_rgba(34,1,49,0.35)] backdrop-blur-xl transition-all duration-500 ease-out-expo",
           hidden && "-translate-y-full opacity-0",
         )}
       >
-        <Container className="flex h-[4.5rem] items-center justify-between gap-3 sm:gap-6">
+        <Container className="flex h-[4.75rem] items-center justify-between gap-3 sm:gap-6">
           <BrandMark />
 
-          <nav aria-label="Main" className="hidden items-center gap-1 xl:flex">
+          <nav aria-label="Main" className="hidden items-center gap-0.5 2xl:flex">
             {mainNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={isActive(item.href) ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-brand-50 hover:text-brand-800",
-                  isActive(item.href) ? "text-brand-700 underline decoration-accent-500 decoration-2 underline-offset-8" : "text-ink",
+                  "rounded-full px-2.5 py-2 text-[0.78rem] font-semibold transition-colors hover:bg-brand-50 hover:text-brand-800 2xl:px-3 2xl:text-sm",
+                  isActive(item.href) ? "bg-brand-50 text-brand-800" : "text-ink",
                 )}
               >
                 {item.label}
@@ -59,7 +59,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
             ))}
           </nav>
 
-          <div className="hidden items-center gap-2 xl:flex">
+          <div className="hidden items-center gap-2 2xl:flex">
             {account ? (
               <>
                 {account.adminHref && <Button href={account.adminHref} variant="ghost">Admin</Button>}
@@ -76,7 +76,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
 
           <button
             type="button"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-brand-800 hover:bg-brand-50 xl:hidden"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-100 bg-brand-50/70 text-brand-800 transition-colors hover:bg-brand-100 2xl:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -87,7 +87,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
         </Container>
 
         {open && (
-          <div id="mobile-nav" className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-t border-brand-100 bg-ivory xl:hidden">
+          <div id="mobile-nav" className="max-h-[calc(100dvh-4.75rem)] overflow-y-auto overscroll-contain border-t border-brand-100 bg-white 2xl:hidden">
             <Container className="py-4">
               <nav aria-label="Mobile">
                 <ul className="grid gap-1 sm:grid-cols-2">

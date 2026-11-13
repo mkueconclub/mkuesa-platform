@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils/cn";
 /**
  * Desktop-only navigation that takes over from the top bar once the page is scrolled.
  * A floating panel slides in from the left; the toggle morphs between a menu icon and a cross
- * and can collapse the panel at any time (Escape also closes it). Hidden below the `xl` breakpoint,
- * where the normal mobile menu is used.
+ * and can collapse the panel at any time (Escape also closes it). Hidden below the `2xl` breakpoint,
+ * where the responsive top-bar menu is used.
  */
 export function SideDock({ docked, account }: { docked: boolean; account: HeaderAccount | null }) {
   const pathname = usePathname();
@@ -43,7 +43,7 @@ export function SideDock({ docked, account }: { docked: boolean; account: Header
   const line = "absolute left-0 h-0.5 rounded-full bg-current transition-all duration-500 ease-spring";
 
   return (
-    <div className="hidden xl:block">
+    <div className="hidden 2xl:block">
       <button
         ref={toggleRef}
         type="button"
