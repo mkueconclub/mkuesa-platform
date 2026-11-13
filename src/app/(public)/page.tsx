@@ -156,12 +156,19 @@ export default function HomePage() {
       <Section tone="paper" eyebrow="What you can do here" title="Make your economics degree go further" description="A connected student experience that helps you build knowledge, confidence and relationships. ">
         <ul className="grid gap-5 md:grid-cols-3">
           {pillars.map(({ icon: Icon, title, text, href, cta }, index) => (
-            <li key={title} className="group relative flex h-full flex-col overflow-hidden rounded-[1.6rem] border border-brand-100 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_55px_-35px_rgba(34,1,49,0.45)] sm:p-8">
-              <span className="absolute right-6 top-5 font-display text-6xl font-semibold text-brand-50 transition-colors group-hover:text-brand-100">0{index + 1}</span>
-              <span className="relative flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-700 transition-all duration-300 group-hover:bg-brand-800 group-hover:text-white"><Icon aria-hidden className="size-6" /></span>
-              <h3 className="relative mt-7 font-display text-2xl font-semibold text-brand-950">{title}</h3>
+            <li key={title} className="group relative flex h-full flex-col overflow-hidden rounded-[1.6rem] border border-brand-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_25px_55px_-35px_rgba(34,1,49,0.45)]">
+              <div aria-hidden className={`relative flex h-44 items-center justify-center overflow-hidden ${index === 0 ? "bg-gradient-to-br from-brand-950 via-brand-800 to-violet-500" : index === 1 ? "bg-gradient-to-br from-[#321044] via-[#6d2990] to-[#e26716]" : "bg-gradient-to-br from-[#1e3445] via-brand-800 to-[#a64cc5]"}`}>
+                <span className="absolute -right-8 -top-12 size-48 rounded-full border border-white/15" />
+                <span className="absolute -bottom-20 -left-8 size-56 rounded-full border border-white/15" />
+                <span className="absolute right-7 top-5 font-display text-6xl font-semibold text-white/15">0{index + 1}</span>
+                <span className="relative flex size-20 items-center justify-center rounded-[1.7rem] border border-white/25 bg-white/10 text-white shadow-2xl backdrop-blur-sm transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"><Icon aria-hidden className="size-10" /></span>
+                <span className="absolute bottom-4 left-6 text-[0.62rem] font-bold uppercase tracking-[0.22em] text-white/75">{index === 0 ? "Learn together" : index === 1 ? "Understand the world" : "Grow your network"}</span>
+              </div>
+              <div className="flex flex-1 flex-col p-7 sm:p-8">
+              <h3 className="font-display text-2xl font-semibold text-brand-950">{title}</h3>
               <p className="relative mt-3 flex-1 leading-relaxed text-muted">{text}</p>
               <Link href={href} className="relative mt-7 inline-flex items-center gap-2 text-sm font-bold text-brand-800">{cta}<ArrowRight className="size-4 transition-transform group-hover:translate-x-1" /></Link>
+              </div>
             </li>
           ))}
         </ul>
@@ -205,10 +212,17 @@ export default function HomePage() {
       <Section eyebrow="Get involved" title="Your place in MKUESA starts here" description="Joining is straightforward. Create an account, apply and become part of the community.">
         <ol className="grid gap-4 md:grid-cols-3">
           {steps.map(({ icon: Icon, title, text }, index) => (
-            <li key={title} className="relative rounded-[1.5rem] border border-brand-100 bg-white p-6 sm:p-8">
-              <div className="flex items-center justify-between"><span className="flex size-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-700"><Icon className="size-5" /></span><span className="font-display text-5xl font-semibold text-brand-100">0{index + 1}</span></div>
-              <h3 className="mt-6 font-display text-2xl font-semibold text-brand-950">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{text}</p>
+            <li key={title} className="group relative overflow-hidden rounded-[1.5rem] border border-brand-100 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_-34px_rgba(34,1,49,0.5)]">
+              <div aria-hidden className={`relative flex h-36 items-center justify-center overflow-hidden ${index === 0 ? "bg-gradient-to-br from-brand-950 to-brand-600" : index === 1 ? "bg-gradient-to-br from-[#4a175f] to-[#d36a22]" : "bg-gradient-to-br from-[#273b4e] to-[#78419b]"}`}>
+                <span className="absolute -right-7 -top-12 size-40 rounded-full border border-white/15" />
+                <span className="absolute -bottom-20 -left-8 size-48 rounded-full border border-white/15" />
+                <span className="absolute right-5 top-3 font-display text-6xl font-semibold text-white/15">0{index + 1}</span>
+                <span className="relative flex size-16 items-center justify-center rounded-2xl border border-white/25 bg-white/10 text-white shadow-xl backdrop-blur-sm transition-transform duration-500 group-hover:scale-110"><Icon className="size-8" /></span>
+              </div>
+              <div className="p-6 sm:p-8">
+                <h3 className="font-display text-2xl font-semibold text-brand-950">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{text}</p>
+              </div>
             </li>
           ))}
         </ol>

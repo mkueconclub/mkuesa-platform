@@ -57,7 +57,7 @@ export const sampleEvents: readonly SampleEvent[] = [
 ];
 
 export const sampleAnnouncements: readonly SampleBase[] = [
-  { slug: "membership-applications", title: "Membership applications", summary: "Placeholder announcement about membership applications opening.", sample: true },
+  { slug: "membership-applications", title: "Find your place in the MKUESA community", summary: "Discover a community built around shared learning, fresh perspectives and meaningful connections. Explore membership, meet fellow economics students and find your own way to contribute.", sample: true },
   { slug: "upcoming-careers-panel", title: "Careers panel registration", summary: "Placeholder announcement about an upcoming event.", sample: true },
   { slug: "new-learning-resources", title: "New learning resources", summary: "Placeholder announcement about resources added to the Learning Hub.", sample: true },
 ];

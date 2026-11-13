@@ -34,8 +34,8 @@ export function PortalNav({ items, label }: { items: PortalNavItem[]; label: str
 
   const linkClass = (active: boolean) =>
     cn(
-      "flex min-h-11 items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-brand-50",
-      active ? "bg-brand-100 text-brand-900" : "text-ink",
+      "flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 hover:bg-brand-50 hover:text-brand-800",
+      active ? "bg-brand-700 text-white shadow-md shadow-brand-900/15 hover:bg-brand-800 hover:text-white" : "text-muted",
     );
 
   return (
@@ -58,7 +58,7 @@ export function PortalNav({ items, label }: { items: PortalNavItem[]; label: str
           <ChevronDown aria-hidden className={cn("size-5 shrink-0 transition-transform duration-200", open && "rotate-180")} />
         </button>
         {open && (
-          <ul id="portal-nav-menu" className="mt-2 grid grid-cols-2 gap-1 rounded-xl border border-brand-100 bg-paper p-2 shadow-lg sm:grid-cols-3">
+          <ul id="portal-nav-menu" className="mt-2 grid grid-cols-2 gap-1 rounded-2xl border border-brand-100 bg-paper p-2 shadow-lg sm:grid-cols-3">
             {items.map(({ href, label: text, icon: Icon }) => (
               <li key={href} className="min-w-0">
                 <Link href={href} aria-current={href === activeHref ? "page" : undefined} className={linkClass(href === activeHref)}>
