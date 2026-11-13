@@ -40,7 +40,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
           hidden && "-translate-y-full opacity-0",
         )}
       >
-        <Container className="flex h-[4.5rem] items-center justify-between gap-6">
+        <Container className="flex h-[4.5rem] items-center justify-between gap-3 sm:gap-6">
           <BrandMark />
 
           <nav aria-label="Main" className="hidden items-center gap-1 xl:flex">
@@ -76,7 +76,7 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
 
           <button
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-md text-brand-800 hover:bg-brand-50 xl:hidden"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-brand-800 hover:bg-brand-50 xl:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -87,10 +87,10 @@ export function SiteHeader({ account }: { account: HeaderAccount | null }) {
         </Container>
 
         {open && (
-          <div id="mobile-nav" className="border-t border-brand-100 bg-ivory xl:hidden">
+          <div id="mobile-nav" className="max-h-[calc(100dvh-4.5rem)] overflow-y-auto overscroll-contain border-t border-brand-100 bg-ivory xl:hidden">
             <Container className="py-4">
               <nav aria-label="Mobile">
-                <ul className="space-y-1">
+                <ul className="grid gap-1 sm:grid-cols-2">
                   {mainNav.map((item) => (
                     <li key={item.href}>
                       <Link

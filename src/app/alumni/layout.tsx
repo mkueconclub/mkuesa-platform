@@ -12,9 +12,9 @@ export default async function AlumniLayout({ children }: { children: React.React
   const alumnus = await getAlumniProfile(profile.id);
   return (
     <div className="min-h-dvh bg-ivory lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
-      <aside className="bg-hero-glow flex flex-col gap-6 px-4 py-6 text-ivory lg:sticky lg:top-0 lg:h-dvh lg:px-6 lg:py-8">
+      <aside className="bg-hero-glow flex flex-col gap-4 px-4 py-4 text-ivory sm:px-6 lg:sticky lg:top-0 lg:h-dvh lg:gap-6 lg:overflow-y-auto lg:overscroll-contain lg:px-6 lg:py-8">
         <BrandMark light />
-        <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-inset ring-white/10">
+        <div className="hidden items-center gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-inset ring-white/10 sm:flex">
           <Avatar name={profile.full_name} />
           <div className="min-w-0">
             <p className="truncate font-semibold text-white">{profile.full_name}</p>
@@ -24,14 +24,16 @@ export default async function AlumniLayout({ children }: { children: React.React
           </div>
         </div>
         <AlumniNav />
-        <div className="flex flex-wrap gap-2 lg:mt-auto lg:flex-col">
-          <AButton href="/opportunities" variant="dark"><Globe aria-hidden className="size-4" /> Live opportunities</AButton>
-          <form action={logoutAction} className="contents">
-            <AButton type="submit" variant="glow" className="lg:w-full"><LogOut aria-hidden className="size-4" /> Sign out</AButton>
+        <div className="grid grid-cols-2 gap-2 lg:mt-auto lg:grid-cols-1">
+          <AButton href="/opportunities" variant="dark" className="w-full px-3 sm:px-6"><Globe aria-hidden className="size-4" /> Live opportunities</AButton>
+          <form action={logoutAction}>
+            <AButton type="submit" variant="glow" className="w-full px-3 sm:px-6"><LogOut aria-hidden className="size-4" /> Sign out</AButton>
           </form>
         </div>
       </aside>
-      <main id="main" className="min-w-0 px-4 py-8 sm:px-8 lg:px-12 lg:py-12">{children}</main>
+      <main id="main" className="min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-12">
+        <div className="mx-auto w-full max-w-6xl 2xl:max-w-7xl">{children}</div>
+      </main>
     </div>
   );
 }

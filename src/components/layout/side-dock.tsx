@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { mainNav, memberActions } from "@/config/site";
 import { logoutAction } from "@/lib/auth/actions";
 import type { HeaderAccount } from "@/lib/auth/account";
+import { useMediaQuery } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -19,7 +20,11 @@ import { cn } from "@/lib/utils/cn";
  */
 export function SideDock({ docked, account }: { docked: boolean; account: HeaderAccount | null }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(true);
+  // Until the visitor uses the toggle, the panel opens by itself only on very wide screens (2xl and up).
+  // On a 1280-1535px laptop it would cover the left-hand side of the page, so it starts collapsed there.
+  const wide = useMediaQuery("(min-width: 96rem)");
+  const [chosen, setChosen] = useState<boolean | null>(null);
+  const open = chosen ?? wide;
   const toggleRef = useRef<HTMLButtonElement>(null);
   const panelOpen = docked && open;
 
@@ -27,7 +32,7 @@ export function SideDock({ docked, account }: { docked: boolean; account: Header
     if (!panelOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
-      setOpen(false);
+      setChosen(false);
       toggleRef.current?.focus();
     };
     document.addEventListener("keydown", onKey);
@@ -46,7 +51,7 @@ export function SideDock({ docked, account }: { docked: boolean; account: Header
         aria-controls="side-dock"
         aria-label={open ? "Close navigation" : "Open navigation"}
         inert={!docked}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setChosen(!open)}
         className={cn(
           "group fixed left-5 top-5 z-50 flex size-12 items-center justify-center rounded-2xl shadow-lg shadow-black/25 transition-all duration-500 ease-spring hover:scale-105 active:scale-95",
           docked ? "rotate-0 scale-100 opacity-100" : "pointer-events-none -rotate-90 scale-50 opacity-0",

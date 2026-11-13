@@ -69,7 +69,7 @@ export async function ContentListPage({ kind, searchParams }: { kind: ContentKin
 
         <Card className="p-0">
           {rows.length ? (
-            <div className="overflow-x-auto">
+            <div className="scroll-x">
               <table className="w-full min-w-[34rem] text-left text-sm">
                 <thead className="border-b border-brand-100 text-muted">
                   <tr>
@@ -203,7 +203,7 @@ export async function EventRegistrations({ eventId, role }: { eventId: string; r
         {count("registered")} registered · {count("attended")} attended · {count("waitlisted")} on the waiting list · {count("cancelled")} cancelled
       </p>
       {rows.length ? (
-        <div className="overflow-x-auto">
+        <div className="scroll-x">
           <table className="w-full min-w-[32rem] text-left text-sm">
             <thead className="border-b border-brand-100 text-muted">
               <tr><th scope="col" className="py-2 pr-4 font-medium">Person</th><th scope="col" className="py-2 pr-4 font-medium">Status</th><th scope="col" className="py-2 pr-4 font-medium">Registered</th><th scope="col" className="py-2 font-medium"><span className="sr-only">Action</span></th></tr>

@@ -55,7 +55,7 @@ export default function HomePage() {
               <span aria-hidden className="size-1.5 rounded-full bg-accent-400" />
               {siteConfig.university}
             </p>
-            <h1 className="animate-rise mt-6 text-balance text-5xl text-white sm:text-6xl lg:text-7xl xl:text-8xl" style={{ ["--delay" as string]: "80ms" }}>
+            <h1 className="animate-rise mt-6 text-balance break-words text-4xl text-white min-[400px]:text-5xl sm:text-6xl lg:text-7xl xl:text-8xl" style={{ ["--delay" as string]: "80ms" }}>
               {siteConfig.tagline}<span className="text-accent-400">.</span>
             </h1>
             <p className="animate-rise mt-6 max-w-xl text-pretty text-lg text-brand-100 sm:text-xl xl:max-w-2xl xl:text-2xl" style={{ ["--delay" as string]: "160ms" }}>
@@ -76,7 +76,7 @@ export default function HomePage() {
       {/* Quick links overlap the hero */}
       <section aria-label="Quick links" className="relative z-10 -mt-16 sm:-mt-20">
         <Container>
-          <ul className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-3 min-[460px]:grid-cols-2 sm:gap-5 lg:grid-cols-4">
             {quickLinks.map(({ icon: Icon, title, text, href }) => (
               <li key={href}>
                 <Link href={href} className={`${card} group flex h-full flex-col gap-4 p-5 transition duration-300 hover:-translate-y-1 hover:ring-brand-300 sm:p-6`}>

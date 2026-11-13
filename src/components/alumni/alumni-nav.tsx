@@ -15,7 +15,7 @@ const items = [
 export function AlumniNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Alumni portal" className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
+    <nav aria-label="Alumni portal" className="-mx-4 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pb-0">
       <ul className="flex gap-2 lg:flex-col">
         {items.map(({ href, label, icon: Icon, ...r }) => {
           const active = "exact" in r ? pathname === href : pathname.startsWith(href);
@@ -25,7 +25,7 @@ export function AlumniNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300",
+                  "flex min-h-11 items-center gap-3 whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-semibold transition-all duration-300",
                   active ? "bg-white text-brand-900 shadow-lg shadow-black/20" : "text-brand-100 hover:bg-white/10 hover:text-white",
                 )}
               >

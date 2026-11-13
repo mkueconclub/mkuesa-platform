@@ -91,7 +91,7 @@ export function MarkAttendedButton({ id }: { id: string }) {
   return (
     <form action={action} className="space-y-1">
       <input type="hidden" name="id" value={id} />
-      <Button type="submit" variant="outline" disabled={pending} className="h-9 px-3">{pending ? "Saving…" : "Mark attended"}</Button>
+      <Button type="submit" variant="outline" disabled={pending} className="h-11 px-3 sm:h-9">{pending ? "Saving…" : "Mark attended"}</Button>
       {state.message && !state.ok && <p role="alert" className="text-xs font-medium text-red-700">{state.message}</p>}
     </form>
   );

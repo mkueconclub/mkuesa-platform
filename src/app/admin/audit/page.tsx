@@ -47,7 +47,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </nav>
         <Card className="p-0">
           {rows.length ? (
-            <div className="overflow-x-auto">
+            <div className="scroll-x">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <thead className="border-b border-brand-100 text-muted">
                   <tr><th scope="col" className="px-4 py-3 font-medium">When</th><th scope="col" className="px-4 py-3 font-medium">Who</th><th scope="col" className="px-4 py-3 font-medium">Action</th><th scope="col" className="px-4 py-3 font-medium">Detail</th></tr>

@@ -46,8 +46,15 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Anchor links and focus jumps stop below the sticky header instead of under it. */
+    scroll-padding-top: 5.5rem;
   }
   body {
+    /* A stray wide element must never make the whole page scroll sideways. `clip` (unlike `hidden`) keeps sticky working. */
+    overflow-x: clip;
+    overflow-wrap: break-word;
+    -webkit-tap-highlight-color: transparent;
     background-color: var(--color-ivory);
     color: var(--color-ink);
     font-family: var(--font-sans);
@@ -60,6 +67,18 @@
     font-family: var(--font-display);
     letter-spacing: -0.01em;
     line-height: 1.15;
+  }
+  img,
+  svg,
+  video {
+    max-width: 100%;
+  }
+  /* Taps respond instantly (no double-tap-zoom delay) on buttons and links. */
+  a,
+  button,
+  summary,
+  [role="button"] {
+    touch-action: manipulation;
   }
   :focus-visible {
     outline: 2px solid var(--color-brand-500);
@@ -118,6 +137,20 @@
 }
 
 @layer utilities {
+  /*
+    Wide tables scroll sideways inside their own box. The soft edge shadows appear only while there is
+    more to scroll, so people on phones can tell the table continues.
+  */
+  .scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    background:
+      linear-gradient(to right, var(--color-paper) 30%, transparent) left center / 2rem 100% no-repeat local,
+      linear-gradient(to left, var(--color-paper) 30%, transparent) right center / 2rem 100% no-repeat local,
+      linear-gradient(to right, rgb(34 1 49 / 0.14), transparent) left center / 0.75rem 100% no-repeat scroll,
+      linear-gradient(to left, rgb(34 1 49 / 0.14), transparent) right center / 0.75rem 100% no-repeat scroll;
+  }
   .animate-rise {
     animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--delay, 0ms);

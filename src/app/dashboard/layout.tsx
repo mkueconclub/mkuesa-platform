@@ -13,13 +13,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <PublicShell>
       <div className="bg-ivory">
-        <Container className="grid gap-8 py-10 lg:grid-cols-[15rem_minmax(0,1fr)] lg:py-14">
-          <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        <Container className="grid gap-6 py-6 sm:py-10 lg:gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:py-14">
+          <aside className="space-y-4 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pr-1">
             <p className="hidden text-sm text-muted lg:block">Signed in as<br /><span className="font-medium text-ink">{profile.full_name}</span></p>
             <DashboardNav />
-            <div className="flex flex-wrap gap-2 lg:flex-col">
-              {staffRoles.includes(profile.role) && <Button href="/admin" variant="accent" className="lg:w-full">Administration</Button>}
-              <form action={logoutAction}><Button type="submit" variant="outline" className="lg:w-full">Sign out</Button></form>
+            <div className="grid grid-cols-2 gap-2 lg:grid-cols-1 [&>*:only-child]:col-span-2 lg:[&>*:only-child]:col-span-1">
+              {staffRoles.includes(profile.role) && <Button href="/admin" variant="accent" className="w-full">Administration</Button>}
+              <form action={logoutAction}><Button type="submit" variant="outline" className="w-full">Sign out</Button></form>
             </div>
           </aside>
           <div className="min-w-0">{children}</div>
