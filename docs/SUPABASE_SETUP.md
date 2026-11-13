@@ -52,10 +52,24 @@ Check: **Table Editor** should list 12 tables (profiles, memberships, announceme
 - **Confirm email: on** (the site relies on this)
 - Minimum password length: **10**
 
+**Authentication → Sign In / Providers → Google** (Continue with Google)
+1. Toggle **Google** on.
+2. You need a Google Cloud OAuth client:
+   - Open [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → Create credentials → OAuth client ID.
+   - Application type: **Web application**.
+   - Authorized JavaScript origins: `http://localhost:3000` and your live site (e.g. `https://mkuesa-platform.vercel.app`).
+   - Authorized redirect URIs: **must** be exactly  
+     `https://<YOUR-PROJECT-REF>.supabase.co/auth/v1/callback`  
+     (copy the callback URL shown inside the Supabase Google provider panel — it is unique to your project).
+3. Paste the **Client ID** and **Client secret** into the Supabase Google provider form and save.
+4. Leave “Skip nonce checks” off unless you have a specific reason.
+
+After this, the “Continue with Google” buttons on `/login` and `/register` work. First-time Google users get a profile automatically (migration `20261117090000_google_oauth_profile.sql`).
+
 **Authentication → URL Configuration**
 - Site URL: the live address, e.g. `https://mkuesa-platform.vercel.app` (use `http://localhost:3000` only while developing locally)
 - Redirect URLs: add **both** `https://mkuesa-platform.vercel.app/**` and `http://localhost:3000/**`
-  (an address missing from this list makes Supabase send every email link to the home page instead)
+  (an address missing from this list makes Supabase send every email link / OAuth return to the home page instead)
 
 ## 6. Email templates (required)
 **Authentication → Email Templates.** Replace the link in each template so it goes through the website:

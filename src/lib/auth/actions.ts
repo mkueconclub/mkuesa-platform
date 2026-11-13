@@ -101,6 +101,47 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   redirect(safeNext(formData.get("next")));
 }
 
+/**
+ * Start Google OAuth (Continue with Google).
+ * Redirects the browser to Google, then back to /auth/confirm which exchanges the code
+ * and lands the person on the dashboard (or the safe "next" path).
+ * Requires the Google provider to be enabled in the Supabase project.
+ */
+export async function signInWithGoogleAction(formData: FormData) {
+  if (!isSupabaseConfigured()) {
+    // Fall back to the login page with a clear message rather than throwing.
+    redirect("/login?error=config");
+  }
+
+  const next = safeNext(formData.get("next"));
+  const origin = await siteOrigin();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}`,
+      queryParams: {
+        // Ask for a refresh token and show the account picker every time
+        // so people can switch Google accounts cleanly.
+        access_type: "offline",
+        prompt: "select_account",
+      },
+    },
+  });
+
+  if (error) {
+    console.error("Google OAuth start failed:", error.status, error.code ?? error.name, error.message);
+    redirect("/login?error=oauth");
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+
+  redirect("/login?error=oauth");
+}
+
 export async function logoutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
