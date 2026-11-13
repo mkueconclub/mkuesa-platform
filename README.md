@@ -40,3 +40,4 @@ npm run dev                  # http://localhost:3000
 
 ## Security
 Never commit `.env.local` or any secret. Only variable *names* belong in `.env.example`.
+how

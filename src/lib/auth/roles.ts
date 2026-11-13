@@ -26,6 +26,16 @@ export const roleLabels: Record<UserRole, string> = {
   member: "General Member",
 };
 
+export const roleBadgeLabels: Record<UserRole, string> = {
+  super_admin: "Master Admin",
+  chairperson: "Chairperson",
+  vice_chairperson: "Vice Chairperson",
+  secretary: "Secretary",
+  treasurer: "Treasurer",
+  membership_coordinator: "Membership Coordinator",
+  content_editor: "Content Editor",
+  member: "Member",
+};
 export const staffRoles: readonly UserRole[] = userRoles.filter((r) => r !== "member");
 export const leadershipRoles: readonly UserRole[] = ["super_admin", "chairperson", "vice_chairperson", "secretary"];
 export const memberReaderRoles: readonly UserRole[] = [...leadershipRoles, "membership_coordinator"];

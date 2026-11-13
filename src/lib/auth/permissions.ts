@@ -51,6 +51,7 @@ export function contentPermissions(kind: ContentKind, role: UserRole): ContentPe
 
 export const can = {
   readMembers: (r: UserRole) => memberReaderRoles.includes(r),
+  readAnalytics: (r: UserRole) => memberReaderRoles.includes(r),
   reviewApplications: (r: UserRole) => memberApproverRoles.includes(r),
   changeRoles: (r: UserRole) => r === "super_admin",
   issueCertificates: (r: UserRole) => memberReaderRoles.includes(r),
@@ -68,6 +69,9 @@ export type AdminNavItem = { href: string; label: string };
 /** Sidebar entries for a role. Pages and the database still check access themselves. */
 export function adminNavFor(role: UserRole): AdminNavItem[] {
   const items: AdminNavItem[] = [{ href: "/admin", label: "Overview" }];
+  if (can.readAnalytics(role)) {
+    items.push({ href: "/admin/analytics", label: "Analytics" });
+  }
   if (can.readMembers(role)) items.push({ href: "/admin/members", label: "Members" }, { href: "/admin/members/applications", label: "Applications" });
   items.push(
     { href: "/admin/events", label: "Events" },

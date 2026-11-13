@@ -1,3 +1,4 @@
+import type { UserRole } from "@/lib/auth/roles";
 import { currentAcademicYear } from "@/config/association";
 import { createClient } from "@/lib/supabase/server";
 import type { MembershipRow, MembershipStatus } from "@/types/database";
@@ -22,9 +23,20 @@ export const currentMembership = (rows: MembershipRow[]): MembershipRow | null =
  * Mirrors private.is_approved_member() in the database: approved and not past its expiry date.
  * Used only to decide what to explain in the interface. The database enforces access on every query.
  */
-export function hasActiveMembership(rows: MembershipRow[], today = new Date()): boolean {
+export function hasActiveMembership(
+  rows: MembershipRow[],
+  today = new Date(),
+  role?: UserRole,
+): boolean {
+  if (role === "super_admin") return true;
+
   const day = today.toISOString().slice(0, 10);
-  return rows.some((m) => m.status === "approved" && (m.expires_at === null || m.expires_at >= day));
+
+  return rows.some(
+    (m) =>
+      m.status === "approved" &&
+      (m.expires_at === null || m.expires_at >= day),
+  );
 }
 
 export const membershipStatusText: Record<MembershipStatus, string> = {
