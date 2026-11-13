@@ -14,7 +14,7 @@ import { formatDay } from "@/lib/utils/date";
 export const metadata: Metadata = { title: "Opportunities" };
 export const dynamic = "force-dynamic"; // approved opportunities appear as soon as they are published
 
-type Opp = { id: string; title: string; category: string; organisation: string | null; description: string; eligibility: string | null; deadline: string | null; apply_url: string | null; contact: string | null };
+type Opp = { id: string; sample?: boolean; title: string; category: string; organisation: string | null; description: string; eligibility: string | null; deadline: string | null; apply_url: string | null; contact: string | null };
 const label = (id: string) => alumniOpportunityCategories.find((c) => c.value === id)?.label ?? opportunityCategories.find((c) => c.id === id)?.label ?? id.replace(/_/g, " ");
 
 export default async function OpportunitiesPage() {
