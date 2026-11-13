@@ -77,6 +77,7 @@ export function adminNavFor(role: UserRole): AdminNavItem[] {
     { href: "/admin/opportunities", label: "Opportunities" },
   );
   if (can.readCertificates(role)) items.push({ href: "/admin/certificates", label: "Certificates" });
+  if (leadershipRoles.includes(role)) items.push({ href: "/admin/alumni", label: "Alumni review" });
   items.push({ href: "/admin/committee", label: "Committee" });
   if (can.readMessages(role)) items.push({ href: "/admin/messages", label: "Messages" });
   if (can.readAudit(role)) items.push({ href: "/admin/audit", label: "Audit log" });

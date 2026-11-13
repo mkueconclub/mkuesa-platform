@@ -10,9 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { mainNav, memberActions } from "@/config/site";
 import { useMediaQuery, useScrolledPast } from "@/hooks/use-scroll";
+import { logoutAction } from "@/lib/auth/actions";
+import type { HeaderAccount } from "@/lib/auth/account";
 import { cn } from "@/lib/utils/cn";
 
-export function SiteHeader() {
+export function SiteHeader({ account }: { account: HeaderAccount | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   // On desktop the top bar hands over to the floating side dock as soon as the page scrolls.
@@ -58,12 +60,18 @@ export function SiteHeader() {
           </nav>
 
           <div className="hidden items-center gap-2 xl:flex">
-            <Button href={memberActions.login.href} variant="ghost">
-              {memberActions.login.label}
-            </Button>
-            <Button href={memberActions.join.href} variant="primary">
-              {memberActions.join.label}
-            </Button>
+            {account ? (
+              <>
+                {account.adminHref && <Button href={account.adminHref} variant="ghost">Admin</Button>}
+                <Button href={account.dashboardHref} variant="primary">{account.dashboardLabel}</Button>
+                <form action={logoutAction}><Button type="submit" variant="outline">Sign out</Button></form>
+              </>
+            ) : (
+              <>
+                <Button href={memberActions.login.href} variant="ghost">{memberActions.login.label}</Button>
+                <Button href={memberActions.join.href} variant="primary">{memberActions.join.label}</Button>
+              </>
+            )}
           </div>
 
           <button
@@ -101,18 +109,24 @@ export function SiteHeader() {
                 </ul>
               </nav>
               <div className="mt-4 grid grid-cols-2 gap-3 border-t border-brand-100 pt-4">
-                <Button href={memberActions.login.href} variant="outline" onClick={() => setOpen(false)}>
-                  {memberActions.login.label}
-                </Button>
-                <Button href={memberActions.join.href} variant="primary" onClick={() => setOpen(false)}>
-                  {memberActions.join.label}
-                </Button>
+                {account ? (
+                  <>
+                    <Button href={account.dashboardHref} variant="primary" onClick={() => setOpen(false)}>{account.dashboardLabel}</Button>
+                    <form action={logoutAction}><Button type="submit" variant="outline" className="w-full">Sign out</Button></form>
+                    {account.adminHref && <Button href={account.adminHref} variant="ghost" className="col-span-2" onClick={() => setOpen(false)}>Administration</Button>}
+                  </>
+                ) : (
+                  <>
+                    <Button href={memberActions.login.href} variant="outline" onClick={() => setOpen(false)}>{memberActions.login.label}</Button>
+                    <Button href={memberActions.join.href} variant="primary" onClick={() => setOpen(false)}>{memberActions.join.label}</Button>
+                  </>
+                )}
               </div>
             </Container>
           </div>
         )}
       </header>
-    <SideDock docked={docked} />
+    <SideDock docked={docked} account={account} />
     </>
   );
 }

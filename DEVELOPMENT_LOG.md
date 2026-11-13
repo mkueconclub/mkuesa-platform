@@ -304,3 +304,82 @@ Add only the advanced features that have a clear purpose, can be maintained by a
 4. File uploads (resource files, publication PDFs, officer photos) and email notifications remain open from earlier phases.
 5. Earlier owner-supplied items: logo, official content, executive consent, Membership Coordinator name.
 
+---
+
+## Interim change — Master Admin access and visible sessions
+**Date:** 12 Nov 2026 · **Requested by the owner during Phase 6 review**
+
+- **Master Admin needs no membership.** Migration `20261114090000_master_admin_access.sql` makes the one database function behind every member-only rule (`private.is_approved_member`) return true for the Super Administrator. That covers members-only announcements, events, resources, event registration and research submission. Other officers are deliberately unchanged (least privilege); extending it is a one-line change if you want it.
+- **Status bar.** A slim bar at the top of every page while signed in shows the role (MASTER ADMIN, Treasurer, Chairperson, Member...), the name, links to Administration and the member portal, and Sign out. The header and the floating side menu show "My dashboard" instead of "Member login / Join".
+- **Why you kept seeing a login prompt.** The session was being saved, but the site never *showed* it: the header always said "Member login" and `/login` always displayed the form. Both are fixed. The session cookie is now explicit: 400 days, renewed automatically, `Secure` in production.
+- **Dashboard for the Master Admin** shows a "Full access" card instead of the membership application.
+
+---
+
+## Phase 7 — Testing and Security Review
+**Date:** 12 Nov 2026 · **Status:** Done as far as the build environment allows; awaiting owner review and the manual checks in `docs/TEST_PLAN.md`
+
+### Objective
+Find and fix problems before deployment. Full results: `docs/SECURITY_REVIEW.md`. Checklist for what needs a browser or Supabase: `docs/TEST_PLAN.md`.
+
+### How it was applied
+Phase 7 was rebuilt as small patches on top of the owner's latest commit (including the KESA affiliation, side dock, landing-page styles and announcement posters). Only the files listed in the hand-over note changed; nothing of the owner's was replaced.
+
+### Completed
+- Reviewed all actions, pages, route handlers, clients, proxy and migrations. **11 findings, all fixed or accepted** (see the report). Two stand out: the committed code did not compile (a missing permission, `readAnalytics`, after an older file replaced it), and the Phase 6 chart colours failed accessibility contrast.
+- Restored three small Phase 6 pieces that had been lost when local files replaced mine: the analytics permission and menu item, the certificate print rules, and the footer link to the certificate check.
+- Hardening: explicit session cookie options, stronger security headers (HSTS, framing/plugin/form restrictions), friendly error pages, `robots.txt`, config guards on the last four actions.
+- **New automated tests:** security (secrets, raw HTML, server/client separation, every action, page and route handler checks access, headers, cookies, redirects, SQL safety), quality (links, accessibility basics, error handling, Master Admin) and 10 more colour-contrast pairs.
+- Documentation: `SECURITY_REVIEW.md`, `TEST_PLAN.md`; setup guide covers the Master Admin and session settings.
+
+### Tests run
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint src tests` | 0 problems |
+| Unit tests | **242 passing** across 13 files (includes your poster tests). Run with a stand-in runner because the Vitest binary could not start in the build sandbox; please run `npm test`. |
+
+### Not tested (be aware)
+- **Database tests t11, t12, t13 (and the earlier ones) have not been run.** Run `npm run test:db` on Linux or WSL.
+- **No browser testing:** responsive layout, keyboard and screen-reader use, Lighthouse performance, real session behaviour across browser restarts, print preview, poster rendering. See `docs/TEST_PLAN.md`.
+- `npm run build`, `npm audit`, penetration testing.
+
+### Before deployment (High items from the review)
+1. Enable CAPTCHA and review rate limits in Supabase Auth (then the Turnstile widget is added).
+2. Set password rules and leaked-password protection in Supabase.
+3. Keep email confirmation on.
+
+### Outstanding
+Everything under "Open items" in `docs/SECURITY_REVIEW.md`, plus: the rest of the public pages still show sample content; file uploads; email notifications; the owner-supplied items (logo files, official content, executive consent).
+
+---
+
+## Content pass — official wording and live public content
+**Date:** 12 Nov 2026 · **Requested by the owner:** write the draft content as the executive committee would, remove anything ambiguous, use the association email as the contact.
+
+### What changed
+- **Contact.** The association email, `mkueconclub@gmail.com`, is now the official contact. It is stored once (`contact.email` in `src/config/association.ts`) and shown on the Contact page, the footer, the About page, the Membership page and the Privacy notice. No phone number, office or social link is published, because none has been supplied.
+- **Removed as ambiguous:** every "to be supplied", "draft for confirmation", "sample", "placeholder" and "to be announced" notice; the empty About sections (history, objectives, constitution and governance); the Membership "Requirements" section (no eligibility or fee rules have been supplied); the sample events, announcements, resources, publications and opportunities.
+- **Rewritten in an official tone** (only what is true of the platform, nothing invented): the Membership benefits and steps, the About page, the Contact page and the Privacy notice (now version 1.0, with a contact for data requests; the line about an unstated hosting region was removed).
+- **Executive committee:** the About page now lists the five offices and prints a name only when the owner switches `showExecutiveNames` on (officer consent). It never prints "To be announced".
+- **Public pages now show real content.** Events (list and detail), Learning Hub, Opportunities and the home page read what the committee publishes in the admin portal (published and public items only). Sections with nothing to show are left out or show a plain message. Closed opportunities (deadline passed) are hidden automatically.
+- **Bug fixed on the way:** the public Research page used publication type names that did not match the database (`analysis` and `association` against `economic_analysis` and `association_publication`), so published economic analyses and association publications would never have appeared. A new test compares the page's categories with the database enums.
+- Deleted `src/config/sample-content.ts` and the unused `page-placeholder.tsx`.
+
+### Tests run
+| Check | Result |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint src tests` | 0 problems |
+| Unit tests | **252 passing** across 13 files. New: a test that fails if any placeholder or draft wording returns to a public page, tests that the email lives in one place and appears on the right pages, category-to-database checks, and tests for the list helpers. |
+
+### Not tested (be aware)
+- Nothing was viewed in a browser or run against Supabase. Please look at Home, About, Membership, Events, Learning Hub, Opportunities, Contact and Privacy on a phone and a laptop.
+- With an empty database the home page now shows only the hero, mission, values and membership steps, and the Events, Learning Hub and Opportunities pages show a short plain message. Publish at least one event, announcement, resource and opportunity in **Administration** to see them filled.
+
+### For the committee to decide (not changed)
+1. **Officer names.** Set `showExecutiveNames = true` in `src/config/association.ts` once each officer has agreed in writing to be named. The Membership Coordinator's name has still not been supplied.
+2. **Privacy notice.** It now reads as final. Have the university's legal or ICT office confirm it before launch, and add retention periods when decided.
+3. **Membership rules.** If there are eligibility rules or fees, send the exact wording and an Requirements section can be added back.
+4. **History, objectives and constitution.** Send the official text (or the constitution PDF) and the About page can carry them.
+

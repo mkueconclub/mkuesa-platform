@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Clock, MapPin } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { SampleEvent } from "@/config/sample-content";
 import { dateParts, formatEventDate } from "@/lib/utils/date";
 
-export function EventCard({ event }: { event: SampleEvent }) {
+export type EventCardData = { slug: string; title: string; summary: string; startsAt: string; location: string | null };
+
+export function EventCard({ event }: { event: EventCardData }) {
   const { day, month } = dateParts(event.startsAt);
   return (
     <Card interactive className="group relative flex h-full gap-5">
@@ -17,7 +17,6 @@ export function EventCard({ event }: { event: SampleEvent }) {
         <span className="mt-1 text-xs font-semibold uppercase tracking-wider">{month}</span>
       </div>
       <div className="flex flex-col gap-2">
-        <Badge tone="neutral" className="self-start">Sample content</Badge>
         <h3 className="text-xl text-brand-900">
           <Link href={`/events/${event.slug}`} className="after:absolute after:inset-0 after:content-[''] group-hover:underline">
             {event.title}
@@ -28,9 +27,11 @@ export function EventCard({ event }: { event: SampleEvent }) {
           <li className="flex items-center gap-1.5">
             <Clock aria-hidden className="size-4" /> {formatEventDate(event.startsAt)}
           </li>
-          <li className="flex items-center gap-1.5">
-            <MapPin aria-hidden className="size-4" /> {event.location}
-          </li>
+          {event.location && (
+            <li className="flex items-center gap-1.5">
+              <MapPin aria-hidden className="size-4" /> {event.location}
+            </li>
+          )}
         </ul>
       </div>
     </Card>

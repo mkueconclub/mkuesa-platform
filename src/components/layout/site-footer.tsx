@@ -2,12 +2,13 @@ import Link from "next/link";
 import { AffiliationFooter } from "@/components/layout/affiliation-badge";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Container } from "@/components/ui/container";
+import { contact } from "@/config/association";
 import { footerGroups, siteConfig } from "@/config/site";
 
 export function SiteFooter() {
   return (
     <footer className="bg-brand-950 text-brand-100">
-      <Container className="grid gap-12 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)] lg:gap-20">
+      <Container className="grid gap-12 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="max-w-sm">
           <BrandMark light />
           <p className="mt-5 text-sm leading-relaxed">{siteConfig.fullName}.</p>
@@ -36,7 +37,12 @@ export function SiteFooter() {
           <p>
             &copy; {new Date().getFullYear()} {siteConfig.fullName}.
           </p>
-          <p>Official contact details and social links will be added once supplied.</p>
+          <p>
+            Contact:{" "}
+            <a href={`mailto:${contact.email}`} className="font-medium text-white underline underline-offset-2 hover:text-accent-400">
+              {contact.email}
+            </a>
+          </p>
         </Container>
       </div>
     </footer>

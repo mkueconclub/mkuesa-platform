@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/public/page-header";
 import { Container } from "@/components/ui/container";
-import { publicationTypes } from "@/config/sample-content";
+import { publicationTypes } from "@/config/taxonomy";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { formatDay } from "@/lib/utils/date";

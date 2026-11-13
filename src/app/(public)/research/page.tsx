@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/public/page-header";
 import { Button } from "@/components/ui/button";
 import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { publicationTypes, samplePublications } from "@/config/sample-content";
+import { publicationTypes } from "@/config/taxonomy";
 import { createPublicClient } from "@/lib/supabase/public";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { formatDay } from "@/lib/utils/date";
@@ -20,8 +20,7 @@ const excerpt = (text: string | null, max = 200) => {
 };
 
 export default async function ResearchPage() {
-  // With Supabase configured the page shows real, published work only. Without it (for example a fresh local
-  // checkout) it falls back to clearly labelled sample content so the layout can still be reviewed.
+  // Shows published work only. When the database is not connected (for example a fresh local checkout) the list is simply empty.
   const live = isSupabaseConfigured();
   let pubs: Pub[] = [];
   let failed = false;
@@ -46,24 +45,11 @@ export default async function ResearchPage() {
         <Button href="/dashboard/research" variant="accent">Submit your research</Button>
       </PageHeader>
 
-      {!live ? (
-        <>
-          <Section tone="paper"><Notice>Sample publications shown to demonstrate the layout.</Notice></Section>
-          {publicationTypes.map((t, i) => (
-            <Section key={t.id} tone={i % 2 === 0 ? "ivory" : "paper"} title={t.label}>
-              <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {samplePublications.filter((p) => p.type === t.id).map((p) => (
-                  <li key={p.slug}><ContentCard label={t.label} title={p.title} summary={p.summary} sample /></li>
-                ))}
-              </ul>
-            </Section>
-          ))}
-        </>
-      ) : failed ? (
+      {failed ? (
         <Section tone="paper"><Notice tone="pending" title="Publications are not available right now">Please try again later.</Notice></Section>
       ) : pubs.length === 0 ? (
         <Section tone="paper">
-          <Notice tone="pending" title="Nothing published yet">Approved members can submit their research from the member dashboard. Accepted work will appear here.</Notice>
+          <Notice tone="pending" title="No publications yet">Publications appear here once they have been reviewed and approved by the committee. Approved members can submit research from the member portal.</Notice>
         </Section>
       ) : (
         publicationTypes.map((t, i) => {

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/public/page-header";
-import { Notice } from "@/components/ui/notice";
 import { Section } from "@/components/ui/section";
-import { privacyNoticeVersion } from "@/config/association";
+import { contact, privacyNoticeVersion } from "@/config/association";
 
 export const metadata: Metadata = { title: "Privacy notice" };
 
@@ -20,10 +19,6 @@ export default function PrivacyPage() {
       <PageHeader eyebrow="Privacy" title="Privacy notice" description="How MKUESA handles personal information on this platform." />
       <Section tone="paper">
         <div className="max-w-3xl space-y-8">
-          <Notice tone="pending" title={`Draft (version ${privacyNoticeVersion}): not yet reviewed`}>
-            This draft describes what the platform actually does. It must be reviewed by the association and by the university&rsquo;s legal or ICT office before launch. Retention periods and the contact for data requests are still to be supplied.
-          </Notice>
-
           <div>
             <h2 className="text-2xl text-brand-900">What we collect</h2>
             <ul className="mt-3 list-disc space-y-2 pl-6">
@@ -40,15 +35,20 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-2xl text-brand-900">Where it is stored</h2>
-            <p className="mt-3">The platform uses Supabase (database and sign-in) and Vercel (hosting). These providers may store data outside Kenya. The hosting region will be stated here before launch.</p>
+            <p className="mt-3">The platform uses Supabase (database and sign-in) and Vercel (hosting). These providers may store data outside Kenya.</p>
           </div>
           <div>
             <h2 className="text-2xl text-brand-900">Your rights</h2>
             <p className="mt-3">Under the Data Protection Act, 2019, you may ask to access, correct or delete your personal information, and to object to its processing. You can edit your profile after signing in.</p>
           </div>
-          <Notice tone="pending" title="To be supplied">
-            Retention periods and the official contact for data requests.
-          </Notice>
+          <div>
+            <h2 className="text-2xl text-brand-900">Contact for data requests</h2>
+            <p className="mt-3">
+              To make a request or ask a question about how your information is handled, write to the association at{" "}
+              <a href={`mailto:${contact.email}`} className="font-semibold text-brand-700 underline">{contact.email}</a>.
+            </p>
+          </div>
+          <p className="text-sm text-muted">Privacy notice version {privacyNoticeVersion}.</p>
         </div>
       </Section>
     </>

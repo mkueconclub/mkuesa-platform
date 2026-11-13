@@ -27,6 +27,7 @@ export const mainNav: readonly NavItem[] = [
   { label: "Learning Hub", href: "/learning-hub" },
   { label: "Research", href: "/research" },
   { label: "Opportunities", href: "/opportunities" },
+  { label: "Alumni", href: "/alumni-network" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -59,6 +60,7 @@ export const footerGroups: readonly { title: string; links: readonly NavItem[] }
     links: [
       { label: "Member login", href: "/login" },
       { label: "How to join", href: "/membership" },
+      { label: "Alumni network", href: "/alumni-network" },
     ],
   },
 ];

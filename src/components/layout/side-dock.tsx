@@ -7,6 +7,8 @@ import { ArrowUp } from "lucide-react";
 import { BrandMark } from "@/components/layout/brand-mark";
 import { Button } from "@/components/ui/button";
 import { mainNav, memberActions } from "@/config/site";
+import { logoutAction } from "@/lib/auth/actions";
+import type { HeaderAccount } from "@/lib/auth/account";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -15,7 +17,7 @@ import { cn } from "@/lib/utils/cn";
  * and can collapse the panel at any time (Escape also closes it). Hidden below the `xl` breakpoint,
  * where the normal mobile menu is used.
  */
-export function SideDock({ docked }: { docked: boolean }) {
+export function SideDock({ docked, account }: { docked: boolean; account: HeaderAccount | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(true);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -97,12 +99,18 @@ export function SideDock({ docked }: { docked: boolean }) {
           </ul>
         </nav>
         <div className="mt-4 grid gap-2 border-t border-white/10 pt-4">
-          <Button href={memberActions.login.href} variant="outlineLight">
-            {memberActions.login.label}
-          </Button>
-          <Button href={memberActions.join.href} variant="accent">
-            {memberActions.join.label}
-          </Button>
+          {account ? (
+            <>
+              <Button href={account.dashboardHref} variant="accent">{account.dashboardLabel}</Button>
+              {account.adminHref && <Button href={account.adminHref} variant="outlineLight">Administration</Button>}
+              <form action={logoutAction}><Button type="submit" variant="outlineLight" className="w-full">Sign out</Button></form>
+            </>
+          ) : (
+            <>
+              <Button href={memberActions.login.href} variant="outlineLight">{memberActions.login.label}</Button>
+              <Button href={memberActions.join.href} variant="accent">{memberActions.join.label}</Button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

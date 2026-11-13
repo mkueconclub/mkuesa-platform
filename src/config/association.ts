@@ -32,8 +32,14 @@ export function visibleCommittee(showNames: boolean = showExecutiveNames): Commi
   return executiveCommittee.map((m) => ({ title: m.title, name: showNames ? m.name : null }));
 }
 
+/**
+ * Official contact for the association. This is the only public contact channel; add a phone number,
+ * office or social links here only once the executive committee has approved them for publication.
+ */
+export const contact = { email: "mkueconclub@gmail.com" } as const;
+
 /** Academic year new membership applications are made for. Owner to confirm each year. */
 export const currentAcademicYear = "2026/2027";
 
 /** Version of the privacy notice a member consents to; stored on their profile. */
-export const privacyNoticeVersion = "draft-1";
+export const privacyNoticeVersion = "1.0";

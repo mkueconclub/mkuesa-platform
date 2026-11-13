@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Notice } from "@/components/ui/notice";
 import { currentAcademicYear } from "@/config/association";
+import { redirect } from "next/navigation";
+import { getAlumniProfile } from "@/lib/alumni/queries";
 import { requireProfile } from "@/lib/auth/session";
 import { currentMembership, eventHasEnded, getMemberships, membershipStatusText } from "@/lib/member/queries";
 import { createClient } from "@/lib/supabase/server";
@@ -19,6 +21,7 @@ type RegWithEvent = { status: string; event: { id: string; title: string; starts
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ denied?: string }> }) {
   const { denied } = await searchParams;
   const profile = await requireProfile("/dashboard");
+  if ((await getAlumniProfile(profile.id))?.status === "approved" && !denied) redirect("/alumni");
   const supabase = await createClient();
 
   const [memberships, regs, anns, certs] = await Promise.all([
