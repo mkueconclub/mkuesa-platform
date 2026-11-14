@@ -8,7 +8,7 @@ export const siteConfig = {
   description:
     "The Mount Kenya University Economics Students Association: membership, events, learning resources, research and opportunities for economics and finance students.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  logo: "/logos/mkuesa-logo-original-400.jpg",
+  logo: "/logos/mkuesa-logo.png", // transparent cut-out of the official logo; the original JPEG stays for posters
 } as const;
 
 /** National body MKUESA is a member of (listed in KESA's public member directory). */

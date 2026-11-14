@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: { default: `${siteConfig.name} | ${siteConfig.fullName}`, template: `%s | ${siteConfig.name}` },
   description: siteConfig.description,
+  // The favicon, app icon and share image come from the icon.svg, favicon.ico, apple-icon.png and
+  // opengraph-image.png files in this folder.
+  openGraph: { type: "website", siteName: siteConfig.name, locale: "en_KE" },
+  twitter: { card: "summary_large_image" },
   // Pre-launch: remove this line when the site goes live (Phase 8).
   robots: { index: false, follow: false },
 };
