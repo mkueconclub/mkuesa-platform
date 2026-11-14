@@ -1,5 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
+import { currentAcademicYear } from "@/config/association";
 import { safeNext } from "@/lib/auth/redirect";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -30,19 +31,39 @@ export async function GET(request: NextRequest) {
 
   if (tokenHash && type && allowedTypes.includes(type)) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-    if (!error) return NextResponse.redirect(new URL(destination(type, requestedNext), origin));
+    if (!error) {
+      if (type === "signup" || type === "email" || type === "invite") await openMembershipApplication(supabase);
+      return NextResponse.redirect(new URL(destination(type, requestedNext), origin));
+    }
     console.error("confirm (token_hash) failed:", error.code ?? error.name);
     return failure(origin, type, requestedNext);
   }
 
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(destination(type, requestedNext), origin));
+    if (!error) {
+      const target = destination(type, requestedNext);
+      // Covers sign-up links and "Continue with Google"; never a password reset. Repeating it is harmless.
+      if (type !== "recovery" && !target.startsWith("/reset-password")) await openMembershipApplication(supabase);
+      return NextResponse.redirect(new URL(target, origin));
+    }
     console.error("confirm (code) failed:", error.code ?? error.name);
     return failure(origin, type, requestedNext);
   }
 
   return failure(origin, type, requestedNext);
+}
+
+/**
+ * A newly confirmed account is placed in the "waiting for confirmation" queue straight away, so the chairperson
+ * and treasurer see it under Applications without the student having to do anything else.
+ * Safe to repeat: an application for the year can only exist once.
+ */
+async function openMembershipApplication(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return;
+  const { error } = await supabase.from("memberships").insert({ profile_id: data.user.id, academic_year: currentAcademicYear });
+  if (error && error.code !== "23505") console.error("open membership application failed:", error.code);
 }
 
 /** Password-reset links always finish on the "choose a new password" page; everything else on "Email verified". */

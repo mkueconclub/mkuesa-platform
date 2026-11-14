@@ -48,7 +48,7 @@ describe("permissions mirror the database", () => {
   });
 
   it("only the right roles review applications, change roles and revoke certificates", () => {
-    expect(userRoles.filter(can.reviewApplications).sort()).toEqual(["chairperson", "membership_coordinator", "super_admin"]);
+    expect(userRoles.filter(can.reviewApplications).sort()).toEqual(["chairperson", "membership_coordinator", "super_admin", "treasurer"]);
     expect(userRoles.filter(can.changeRoles)).toEqual(["super_admin"]);
     expect(userRoles.filter(can.revokeCertificates).sort()).toEqual(["chairperson", "super_admin"]);
   });

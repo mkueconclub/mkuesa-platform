@@ -74,7 +74,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   }
   if (data.session) redirect("/dashboard"); // only when email confirmation is switched off
   // Same message whether or not the address already has an account (prevents account enumeration).
-  return { ok: true, message: "Almost done. If this address can be registered, a confirmation link is on its way. Open it to activate your account." };
+  return { ok: true, message: `Check your email. We have sent a confirmation email to ${v.email}. Open it and click the link to activate your account. If you cannot find it, look in your spam or junk folder.` };
 }
 
 export async function loginAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -190,8 +190,8 @@ export async function applyForMembershipAction(_prev: FormState, formData: FormD
     console.error("membership application failed:", error.code);
     return { ok: false, message: "Your application could not be submitted. Please try again." };
   }
-  revalidatePath("/dashboard");
-  return { ok: true, message: "Application submitted. The membership team will review it." };
+  revalidatePath("/dashboard", "layout");
+  return { ok: true, message: "Application submitted. The chairperson or treasurer will confirm it once your payment is received." };
 }
 
 export async function submitContactAction(_prev: FormState, formData: FormData): Promise<FormState> {

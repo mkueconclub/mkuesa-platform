@@ -41,5 +41,16 @@ export const contact = { email: "mkueconclub@gmail.com" } as const;
 /** Academic year new membership applications are made for. Owner to confirm each year. */
 export const currentAcademicYear = "2026/2027";
 
+/**
+ * Membership fees and how to pay them. New members pay once; existing members renew every semester.
+ * The treasurer or chairperson confirms the payment in the admin area, which unlocks the member dashboard.
+ */
+export const membershipFees = {
+  newMember: 100,
+  renewal: 50,
+  renewalPeriod: "semester",
+  pochiLaBiashara: "0790258319",
+} as const;
+
 /** Version of the privacy notice a member consents to; stored on their profile. */
 export const privacyNoticeVersion = "1.0";

@@ -39,7 +39,7 @@ type Row = {
 
 export default async function ApplicationsPage({ searchParams }: { searchParams: Promise<{ status?: string; year?: string }> }) {
   const me = await requireRole(staffRoles, "/admin/members/applications");
-  if (!can.readMembers(me.role)) notFound();
+  if (!can.readMembers(me.role) && !can.reviewApplications(me.role)) notFound();
   const sp = await searchParams;
   const status = tabs.some((t) => t.value === sp.status) ? (sp.status as MembershipStatus | "all") : "pending";
   const year = /^\d{4}\/\d{4}$/.test(sp.year ?? "") ? (sp.year as string) : currentAcademicYear;
@@ -61,7 +61,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
     <>
       <PageTitle eyebrow="Administration" title="Membership applications" description={`Academic year ${year}.`} />
       <div className="space-y-6">
-        {!canReview && <Notice tone="pending">Your role can view applications. The Chairperson, Membership Coordinator and Super Administrator make the decisions.</Notice>}
+        {!canReview && <Notice tone="pending">Your role can view applications. The Chairperson, Treasurer, Membership Coordinator and Super Administrator make the decisions.</Notice>}
         {error && <Notice>Could not load applications. Please try again.</Notice>}
         <nav aria-label="Filter by status" className="flex flex-wrap gap-2">
           {tabs.map((t) => (

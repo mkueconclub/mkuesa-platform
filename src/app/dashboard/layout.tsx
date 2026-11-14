@@ -5,10 +5,18 @@ import { Container } from "@/components/ui/container";
 import { logoutAction } from "@/lib/auth/actions";
 import { staffRoles } from "@/lib/auth/roles";
 import { requireProfile } from "@/lib/auth/session";
+import { getAlumniProfile } from "@/lib/alumni/queries";
+import { MembershipGate } from "@/components/dashboard/membership-gate";
+import { getMemberships, hasActiveMembership } from "@/lib/member/queries";
 import { ArrowUpRight, GraduationCap, ShieldCheck } from "lucide-react";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await requireProfile("/dashboard");
+  // The dashboard opens only once the chairperson or treasurer has confirmed the member (an approved, unexpired
+  // membership). The Super Administrator and approved alumni are never held back. The database applies the
+  // same rule to members-only data, so this is not just cosmetic.
+  const [memberships, alumnus] = await Promise.all([getMemberships(profile.id), getAlumniProfile(profile.id)]);
+  const hasAccess = hasActiveMembership(memberships, new Date(), profile.role) || alumnus?.status === "approved";
   const initials = profile.full_name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   return (
     <PublicShell>
@@ -28,7 +36,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <form action={logoutAction} className={staffRoles.includes(profile.role) ? "" : "col-span-2 lg:col-span-1"}><Button type="submit" variant="outline" className="w-full">Sign out</Button></form>
             </div>
           </aside>
-          <div className="min-w-0">{children}</div>
+          <div className="min-w-0">{hasAccess ? children : <MembershipGate memberships={memberships} />}</div>
         </Container>
       </div>
     </PublicShell>

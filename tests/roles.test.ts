@@ -8,7 +8,8 @@ const dir = join(process.cwd(), "supabase/migrations");
 const sql = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort().map((f) => readFileSync(join(dir, f), "utf8")).join("\n");
 
 const roleArray = (fn: string): string[] => {
-  const m = sql.match(new RegExp(`function private\\.${fn}\\(\\)[\\s\\S]*?array\\[([^\\]]+)\\]`));
+  // Later migrations may redefine a function with `create or replace`, so the LAST definition is the live one.
+  const m = [...sql.matchAll(new RegExp(`function private\\.${fn}\\(\\)[\\s\\S]*?array\\[([^\\]]+)\\]`, "g"))].at(-1);
   if (!m) throw new Error(`could not find ${fn} in migrations`);
   return m[1].split(",").map((s) => s.trim().replace(/'/g, ""));
 };
@@ -26,8 +27,8 @@ describe("roles stay in sync with the database", () => {
     expect(staffRoles).not.toContain("member");
     expect(staffRoles).toHaveLength(userRoles.length - 1);
   });
-  it("only Super Admin, Chairperson and Membership Coordinator can approve members", () => {
-    expect([...memberApproverRoles].sort()).toEqual(["chairperson", "membership_coordinator", "super_admin"]);
+  it("only Super Admin, Chairperson, Treasurer and Membership Coordinator can approve members", () => {
+    expect([...memberApproverRoles].sort()).toEqual(["chairperson", "membership_coordinator", "super_admin", "treasurer"]);
   });
   it("treasurer and content editor can never read individual member data", () => {
     expect(memberReaderRoles).not.toContain("treasurer");

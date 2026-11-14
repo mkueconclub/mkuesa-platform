@@ -39,6 +39,6 @@ export const roleBadgeLabels: Record<UserRole, string> = {
 export const staffRoles: readonly UserRole[] = userRoles.filter((r) => r !== "member");
 export const leadershipRoles: readonly UserRole[] = ["super_admin", "chairperson", "vice_chairperson", "secretary"];
 export const memberReaderRoles: readonly UserRole[] = [...leadershipRoles, "membership_coordinator"];
-export const memberApproverRoles: readonly UserRole[] = ["super_admin", "chairperson", "membership_coordinator"];
+export const memberApproverRoles: readonly UserRole[] = ["super_admin", "chairperson", "treasurer", "membership_coordinator"];
 
 export const isUserRole = (v: unknown): v is UserRole => typeof v === "string" && (userRoles as readonly string[]).includes(v);

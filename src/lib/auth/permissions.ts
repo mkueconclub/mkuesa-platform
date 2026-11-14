@@ -78,6 +78,7 @@ export function adminNavFor(role: UserRole): AdminNavItem[] {
     items.push({ href: "/admin/analytics", label: "Analytics" });
   }
   if (can.readMembers(role)) items.push({ href: "/admin/members", label: "Members" }, { href: "/admin/members/applications", label: "Applications" });
+  else if (can.reviewApplications(role)) items.push({ href: "/admin/members/applications", label: "Applications" }); // e.g. the Treasurer confirms payments
   items.push(
     { href: "/admin/events", label: "Events" },
     { href: "/admin/announcements", label: "Announcements" },

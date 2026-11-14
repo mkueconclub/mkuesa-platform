@@ -40,7 +40,7 @@ export function hasActiveMembership(
 }
 
 export const membershipStatusText: Record<MembershipStatus, string> = {
-  pending: "Your application is awaiting review by the membership team.",
+  pending: "Your membership is waiting for confirmation from the chairperson or treasurer.",
   approved: "Your membership is active.",
   rejected: "Your application was not approved.",
   suspended: "Your membership is suspended. Please contact the association.",
