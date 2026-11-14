@@ -30,10 +30,11 @@ export const contentMatrix: Record<Exclude<ContentKind, "committee">, Matrix> = 
 const committeeWriters: readonly UserRole[] = ["super_admin", "chairperson", "secretary"];
 
 /**
- * Officers who can download an announcement poster. The poster is signed with the downloader's own name
- * and title. Not enforced by the database: it only reads announcements, which every staff role may read.
+ * Administrators who can download a branded poster of an announcement, event or opportunity.
+ * Every staff role may; the poster is signed with the downloader's own name and title.
+ * Not enforced by the database: it only reads content, which every staff role may read.
  */
-export const posterSignerRoles: readonly UserRole[] = ["chairperson", "treasurer"];
+export const posterSignerRoles: readonly UserRole[] = staffRoles;
 
 export type ContentPermissions = { read: boolean; write: boolean; delete: boolean; draftOnly: boolean };
 

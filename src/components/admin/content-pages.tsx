@@ -4,18 +4,20 @@ import { BackLink, ContentForm, DeleteContentButton } from "@/components/admin/c
 import { MarkAttendedButton } from "@/components/admin/admin-forms";
 import { PageTitle } from "@/components/dashboard/page-title";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonClass } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { PosterCard } from "@/components/admin/poster-card";
 import { Card } from "@/components/ui/card";
 import { Notice } from "@/components/ui/notice";
 import { contentConfigs, type ContentConfig, type Field } from "@/lib/admin/content-config";
 import { can, contentPermissions, type ContentKind } from "@/lib/auth/permissions";
 import { requireRole } from "@/lib/auth/session";
 import { roleLabels, staffRoles } from "@/lib/auth/roles";
-import { fitPosterText } from "@/lib/poster/layout";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay, formatEventDate, toNairobiInput } from "@/lib/utils/date";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Content that can be shared as a poster, with the word used for it on screen. */
+const posterKinds: Partial<Record<ContentKind, string>> = { announcements: "announcement", events: "event", opportunities: "opportunity" };
 const human = (v: unknown) => String(v).replace(/_/g, " ");
 
 /** The committee's approval flag is changed on its own card by the Super Administrator, so it is not a form field. */
@@ -48,7 +50,7 @@ export async function ContentListPage({ kind, searchParams }: { kind: ContentKin
   const perms = contentPermissions(kind, profile.role);
   if (!perms.read) notFound();
   const { saved, deleted } = await searchParams;
-  const showPoster = kind === "announcements" && can.downloadPoster(profile.role);
+  const showPoster = kind in posterKinds && can.downloadPoster(profile.role);
 
   const supabase = await createClient();
   const columns = ["id", cfg.titleField, ...cfg.list.map((c) => c.field)];
@@ -90,7 +92,7 @@ export async function ContentListPage({ kind, searchParams }: { kind: ContentKin
                       ))}
                       {showPoster && (
                         <td className="px-4 py-3 align-top">
-                          <a href={`${cfg.basePath}/${r.id}/poster`} download className="font-medium text-brand-700 hover:underline">Download</a>
+                          <Link href={`${cfg.basePath}/${r.id}#poster`} className="font-medium text-brand-700 hover:underline">Poster</Link>
                         </td>
                       )}
                     </tr>
@@ -150,12 +152,14 @@ export async function ContentEditPage({ kind, id, extra }: { kind: ContentKind; 
             <ContentForm kind={kind} id={id} fields={formFields(cfg)} initial={toInitial(cfg.fields, row)} allowedStatuses={perms.draftOnly ? ["draft"] : undefined} cancelHref={cfg.basePath} submitLabel="Save changes" />
           </Card>
         )}
-        {kind === "announcements" && can.downloadPoster(profile.role) && (
+        {kind in posterKinds && can.downloadPoster(profile.role) && (
           <PosterCard
-            href={`${cfg.basePath}/${id}/poster`}
+            basePath={cfg.basePath}
+            id={id}
+            noun={posterKinds[kind]!}
             signer={`${profile.full_name}, ${roleLabels[profile.role]}`}
             published={row.status === "published"}
-            truncated={fitPosterText(String(row.title ?? ""), String(row.body ?? "")).truncated}
+            membersOnly={row.visibility === "members"}
           />
         )}
         {extra}
@@ -168,20 +172,6 @@ export async function ContentEditPage({ kind, id, extra }: { kind: ContentKind; 
         )}
       </div>
     </>
-  );
-}
-
-function PosterCard({ href, signer, published, truncated }: { href: string; signer: string; published: boolean; truncated: boolean }) {
-  return (
-    <Card className="space-y-3">
-      <h2 className="text-xl text-brand-900">Official poster</h2>
-      <p className="text-sm text-muted">
-        Download this announcement as an A4 poster (PNG) with the MKUESA letterhead and logo, signed as <strong className="text-ink">{signer}</strong>.
-      </p>
-      {!published && <Notice tone="pending">This announcement is not published yet, so the poster is marked DRAFT.</Notice>}
-      {truncated && <Notice tone="pending">The message is too long for one page, so the poster shows the first part and points readers to the member portal.</Notice>}
-      <a href={href} download className={buttonClass("primary")}>Download poster</a>
-    </Card>
   );
 }
 

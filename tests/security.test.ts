@@ -96,11 +96,18 @@ describe("protected route handlers", () => {
     expect(routes.length).toBeGreaterThanOrEqual(1);
     for (const r of routes) expect(read(r)).toMatch(/requireRole\(|requireProfile\(/);
   });
-  it("the poster download is limited to the officers who may sign posters, and never trusts the request for the signature", () => {
-    const route = read("src/app/admin/announcements/[id]/poster/route.ts");
-    expect(route).toMatch(/requireRole\(posterSignerRoles/);
-    expect(route).toMatch(/signer: \{ name: profile\.full_name, title: roleLabels\[profile\.role\] \}/);
-    expect(route).toContain('"Cache-Control": "private, no-store"');
+  it("every poster download checks the caller's role, and the signature never comes from the request", () => {
+    const routes = ["announcements", "events", "opportunities"].map((k) => `src/app/admin/${k}/[id]/poster/route.ts`);
+    for (const r of routes) {
+      const route = read(r);
+      expect(route, r).toMatch(/requireRole\(posterSignerRoles/);
+      expect(route, r).toMatch(/posterResponse\(/);
+      expect(route, r).not.toMatch(/searchParams/); // the route never reads a name or title from the request
+    }
+    const handler = read("src/lib/poster/handler.ts");
+    expect(handler).toMatch(/\{ name: profile\.full_name, title: roleLabels\[profile\.role\] \}/);
+    expect(handler).toContain('"Cache-Control": "private, no-store"');
+    expect(handler).not.toMatch(/searchParams\.get\("(name|title|signer|signature)"\)/);
   });
 });
 
